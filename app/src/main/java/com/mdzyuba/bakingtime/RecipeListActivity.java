@@ -3,23 +3,27 @@ package com.mdzyuba.bakingtime;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.mdzyuba.bakingtime.dummy.DummyContent;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.mdzyuba.bakingtime.model.Recipe;
+import com.mdzyuba.bakingtime.view.RecipeListViewModel;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.RecyclerView;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * An activity representing a list of Items. This activity
@@ -37,10 +41,19 @@ public class RecipeListActivity extends AppCompatActivity {
      */
     private boolean mTwoPane;
 
+    private RecipeListViewModel recipeListViewModel;
+
+    @BindView(R.id.item_list)
+    RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
+
+        ButterKnife.bind(this);
+
+        recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,28 +76,27 @@ public class RecipeListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-        View recyclerView = findViewById(R.id.item_list);
-        assert recyclerView != null;
-        setupRecyclerView((RecyclerView) recyclerView);
-    }
-
-    private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, DummyContent.ITEMS, mTwoPane));
+        recipeListViewModel.getRecipes().observe(this, new Observer<Collection<Recipe>>() {
+            @Override
+            public void onChanged(Collection<Recipe> recipes) {
+                recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(RecipeListActivity.this, recipes, mTwoPane));
+            }
+        });
     }
 
     public static class SimpleItemRecyclerViewAdapter
             extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
         private final RecipeListActivity mParentActivity;
-        private final List<DummyContent.DummyItem> mValues;
+        private final List<Recipe> recipes;
         private final boolean mTwoPane;
         private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DummyContent.DummyItem item = (DummyContent.DummyItem) view.getTag();
+                Recipe recipe = (Recipe) view.getTag();
                 if (mTwoPane) {
                     Bundle arguments = new Bundle();
-                    arguments.putString(RecipeDetailFragment.ARG_ITEM_ID, item.id);
+                    arguments.putString(RecipeDetailFragment.ARG_ITEM_ID, String.valueOf(recipe.getId()));
                     RecipeDetailFragment fragment = new RecipeDetailFragment();
                     fragment.setArguments(arguments);
                     mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -92,16 +104,16 @@ public class RecipeListActivity extends AppCompatActivity {
                 } else {
                     Context context = view.getContext();
                     Intent intent = new Intent(context, RecipeDetailActivity.class);
-                    intent.putExtra(RecipeDetailFragment.ARG_ITEM_ID, item.id);
+                    intent.putExtra(RecipeDetailFragment.ARG_ITEM_ID, String.valueOf(recipe.getId()));
 
                     context.startActivity(intent);
                 }
             }
         };
 
-        SimpleItemRecyclerViewAdapter(RecipeListActivity parent, List<DummyContent.DummyItem> items,
+        SimpleItemRecyclerViewAdapter(RecipeListActivity parent, Collection<Recipe> recipes,
                                       boolean twoPane) {
-            mValues = items;
+            this.recipes = new ArrayList<>(recipes);
             mParentActivity = parent;
             mTwoPane = twoPane;
         }
@@ -115,16 +127,17 @@ public class RecipeListActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mIdView.setText(mValues.get(position).id);
-            holder.mContentView.setText(mValues.get(position).content);
+            Recipe recipe = recipes.get(position);
+            holder.mIdView.setText(String.valueOf(recipe.getId()));
+            holder.mContentView.setText(recipe.getName());
 
-            holder.itemView.setTag(mValues.get(position));
+            holder.itemView.setTag(recipe);
             holder.itemView.setOnClickListener(mOnClickListener);
         }
 
         @Override
         public int getItemCount() {
-            return mValues.size();
+            return recipes.size();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
