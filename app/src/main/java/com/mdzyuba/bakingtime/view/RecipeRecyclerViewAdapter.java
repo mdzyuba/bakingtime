@@ -33,7 +33,7 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
             Recipe recipe = (Recipe) view.getTag();
             if (twoPane) {
                 Bundle arguments = new Bundle();
-                arguments.putString(RecipeDetailFragment.ARG_ITEM_ID, String.valueOf(recipe.getId()));
+                arguments.putParcelable(RecipeDetailFragment.ARG_RECIPE, recipe);
                 RecipeDetailFragment fragment = new RecipeDetailFragment();
                 fragment.setArguments(arguments);
                 mParentActivity.getSupportFragmentManager().beginTransaction()
@@ -41,8 +41,7 @@ public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecycl
             } else {
                 Context context = view.getContext();
                 Intent intent = new Intent(context, RecipeDetailActivity.class);
-                intent.putExtra(RecipeDetailFragment.ARG_ITEM_ID, String.valueOf(recipe.getId()));
-
+                intent.putExtra(RecipeDetailFragment.ARG_RECIPE, recipe);
                 context.startActivity(intent);
             }
         }

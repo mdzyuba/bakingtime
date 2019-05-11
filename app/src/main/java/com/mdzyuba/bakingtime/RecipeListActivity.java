@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
@@ -34,9 +33,6 @@ public class RecipeListActivity extends AppCompatActivity {
     @BindView(R.id.item_list)
     RecyclerView recyclerView;
 
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
-
     /**
      * The detail container view will be present only in the
      * large-screen layouts (res/values-w900dp).
@@ -46,6 +42,7 @@ public class RecipeListActivity extends AppCompatActivity {
     @Nullable
     @BindView(R.id.item_detail_container)
     FrameLayout dualPaneFrame;
+
     private final Observer<Collection<Recipe>> recipesObserver = new Observer<Collection<Recipe>>() {
         @Override
         public void onChanged(Collection<Recipe> recipes) {
@@ -64,9 +61,6 @@ public class RecipeListActivity extends AppCompatActivity {
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
 
         ButterKnife.bind(this);
-
-        setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
     }
 
     /**
