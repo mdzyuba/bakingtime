@@ -55,7 +55,7 @@ public class RecipeListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_list);
+        setContentView(R.layout.activity_recipe_list);
 
         recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
