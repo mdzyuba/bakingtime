@@ -32,7 +32,7 @@ public class RecipeDetailFragment extends Fragment {
      */
     private Recipe recipe;
 
-    @BindView(R.id.details)
+    @BindView(R.id.rv_details)
     RecyclerView recyclerView;
 
     /**

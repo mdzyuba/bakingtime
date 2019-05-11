@@ -50,6 +50,9 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
 
     static class StepViewHolder extends RecyclerView.ViewHolder {
 
+        @BindView(R.id.tv_step_id)
+        TextView stepId;
+
         @BindView(R.id.tv_name)
         TextView name;
 
@@ -59,6 +62,9 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         }
 
         void bind(Step step) {
+            if (step.getId() > 0) {
+                stepId.setText(String.format("%d.", step.getId()));
+            }
             name.setText(step.getShortDescription());
         }
     }

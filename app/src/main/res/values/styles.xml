@@ -17,4 +17,10 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="ingredientsTitle" parent="TextAppearance.AppCompat.Title">
+    </style>
+
+    <style name="recipeStepTitle" parent="TextAppearance.AppCompat.Title">
+    </style>
+
 </resources>
