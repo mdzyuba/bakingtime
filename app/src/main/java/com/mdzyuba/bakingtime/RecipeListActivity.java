@@ -4,8 +4,8 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 
 import com.mdzyuba.bakingtime.model.Recipe;
-import com.mdzyuba.bakingtime.view.RecipeListViewModel;
-import com.mdzyuba.bakingtime.view.RecipeRecyclerViewAdapter;
+import com.mdzyuba.bakingtime.view.list.RecipeListViewModel;
+import com.mdzyuba.bakingtime.view.list.RecipeRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,12 +19,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * An activity representing a list of Items. This activity
- * has different presentations for handset and tablet-size devices. On
- * handsets, the activity presents a list of items, which when touched,
- * lead to a {@link RecipeDetailActivity} representing
- * item details. On tablets, the activity presents the list of items and
- * item details side-by-side using two vertical panes.
+ * Displays a collection of Recipes.
+ *
+ * A click on a Recipe will open RecipeDetailActivity.
  */
 public class RecipeListActivity extends AppCompatActivity {
 

@@ -3,4 +3,10 @@
     <string name="title_recipe_details">Recipe Details</string>
     <string name="ingredients">Ingredients</string>
     <string name="number_format">%1$d.</string>
+    <string name="title_activity_recipe_step_details">
+        RecipeStepDetailsActivity
+    </string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>

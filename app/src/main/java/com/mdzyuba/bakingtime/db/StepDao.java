@@ -14,8 +14,11 @@ import androidx.room.Update;
 @Dao
 public interface StepDao {
 
-    @Query("SELECT * from step WHERE recipeId = :recipeId ORDER BY id")
+    @Query("SELECT * FROM step WHERE recipeId = :recipeId ORDER BY id")
     List<Step> loadSteps(int recipeId);
+
+    @Query("SELECT * FROM step WHERE pk = :stepPk")
+    Step loadStep(int stepPk);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(Step step);

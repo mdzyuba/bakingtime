@@ -1,13 +1,14 @@
-package com.mdzyuba.bakingtime;
+package com.mdzyuba.bakingtime.view.details;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mdzyuba.bakingtime.R;
+import com.mdzyuba.bakingtime.RecipeDetailActivity;
+import com.mdzyuba.bakingtime.RecipeListActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
-import com.mdzyuba.bakingtime.view.RecipeDetailsViewAdapter;
-import com.mdzyuba.bakingtime.view.RecipeDetailsViewModel;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -48,7 +49,8 @@ public class RecipeDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+        detailsViewModel = ViewModelProviders.of(this)
+                                             .get(RecipeDetailsViewModel.class);
 
         Bundle arguments = getArguments();
         if (arguments != null && arguments.containsKey(ARG_RECIPE_ID)) {
@@ -66,13 +68,15 @@ public class RecipeDetailFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+        Observer<Recipe> recipeObserver = new Observer<Recipe>() {
             @Override
             public void onChanged(Recipe recipe) {
                 RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe);
                 recyclerView.setAdapter(viewAdapter);
             }
-        });
+        };
+
+        detailsViewModel.getRecipe().observe(this, recipeObserver);
 
         return rootView;
     }

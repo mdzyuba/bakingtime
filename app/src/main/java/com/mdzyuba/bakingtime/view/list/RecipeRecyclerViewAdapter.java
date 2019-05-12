@@ -1,4 +1,4 @@
-package com.mdzyuba.bakingtime.view;
+package com.mdzyuba.bakingtime.view.list;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeDetailActivity;
-import com.mdzyuba.bakingtime.RecipeDetailFragment;
+import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.RecipeListActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
 

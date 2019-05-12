@@ -82,6 +82,12 @@ public class RecipeFactory {
         return recipe;
     }
 
+    public Step loadStep(Context context, int stepId) {
+        RecipeDatabase database = RecipeDatabase.getInstance(context);
+        StepDao stepDao = database.stepDao();
+        return stepDao.loadStep(stepId);
+    }
+
     private void updateChildParentReferences(Collection<Recipe> recipes) {
         for (Recipe recipe: recipes) {
             for (Step step: recipe.getSteps()) {

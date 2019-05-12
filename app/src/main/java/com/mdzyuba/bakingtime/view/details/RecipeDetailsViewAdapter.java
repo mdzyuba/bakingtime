@@ -1,14 +1,17 @@
-package com.mdzyuba.bakingtime.view;
+package com.mdzyuba.bakingtime.view.details;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
+import com.mdzyuba.bakingtime.RecipeStepDetailsActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 
 import java.util.List;
 
@@ -26,6 +29,15 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         this.recipe = recipe;
     }
 
+    private final View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Step step = (Step) view.getTag();
+            Context context = view.getContext();
+            RecipeStepDetailsActivity.startActivity(context, step);
+        }
+    };
+
     @NonNull
     @Override
     public StepViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -41,6 +53,8 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         List<Step> steps = recipe.getSteps();
         Step step = steps.get(position);
         holder.bind(step);
+        holder.itemView.setTag(step);
+        holder.itemView.setOnClickListener(onClickListener);
     }
 
     @Override
