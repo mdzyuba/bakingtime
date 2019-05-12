@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.mdzyuba.bakingtime.model.Recipe;
-
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import butterknife.ButterKnife;
@@ -18,7 +16,7 @@ import butterknife.ButterKnife;
  */
 public class RecipeDetailActivity extends AppCompatActivity {
 
-    private Recipe recipe;
+    private String recipeName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,10 +25,10 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
         ButterKnife.bind(this);
 
-        if (recipe == null) {
-            recipe = getIntent().getParcelableExtra(RecipeDetailFragment.ARG_RECIPE);
+        if (recipeName == null) {
+            recipeName = getIntent().getStringExtra(RecipeDetailFragment.ARG_RECIPE_NAME);
         }
-        setTitle(recipe.getName());
+        setTitle(recipeName);
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -51,7 +49,8 @@ public class RecipeDetailActivity extends AppCompatActivity {
             // Create the detail fragment and add it to the activity
             // using a fragment transaction.
             Bundle arguments = new Bundle();
-            arguments.putParcelable(RecipeDetailFragment.ARG_RECIPE, recipe);
+            int recipeId = getIntent().getIntExtra(RecipeDetailFragment.ARG_RECIPE_ID, 0);
+            arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
             RecipeDetailFragment fragment = new RecipeDetailFragment();
             fragment.setArguments(arguments);
             getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)

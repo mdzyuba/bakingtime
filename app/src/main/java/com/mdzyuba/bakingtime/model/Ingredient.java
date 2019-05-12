@@ -1,23 +1,45 @@
 package com.mdzyuba.bakingtime.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.Entity;
+import androidx.room.ForeignKey;
+import androidx.room.Index;
+import androidx.room.PrimaryKey;
 
-public class Ingredient implements Parcelable {
+@Entity(tableName = "ingredient",
+        foreignKeys = @ForeignKey(entity = Recipe.class,
+                                  parentColumns = "id",
+                                  childColumns = "recipeId",
+                                  onDelete = ForeignKey.CASCADE),
+        indices = { @Index( value = {"recipeId", "ingredient"}, unique = true)})
+public class Ingredient {
 
-    private float quantity;
-    // TODO: convert to an enum
-    @Nullable
-    private String measure;
-    @Nullable
+    @PrimaryKey(autoGenerate = true)
+    private Integer pk;
+
+    /**
+     * Used to keep the same order of ingredients as provided from the Web.
+     */
+    private Integer id;
+
+    @NonNull
     private String ingredient;
 
-    public Ingredient(float quantity, @Nullable String measure, @Nullable String ingredient) {
+    @NonNull
+    private Integer recipeId;
+
+    private float quantity;
+
+    @Nullable
+    private String measure;
+
+    public Ingredient(@NonNull String ingredient, @NonNull Integer recipeId, float quantity,
+                      @Nullable String measure) {
+        this.ingredient = ingredient;
+        this.recipeId = recipeId;
         this.quantity = quantity;
         this.measure = measure;
-        this.ingredient = ingredient;
     }
 
     public float getQuantity() {
@@ -29,9 +51,34 @@ public class Ingredient implements Parcelable {
         return measure;
     }
 
-    @Nullable
+    @NonNull
     public String getIngredient() {
         return ingredient;
+    }
+
+    @NonNull
+    public Integer getRecipeId() {
+        return recipeId;
+    }
+
+    public void setRecipeId(@NonNull Integer recipeId) {
+        this.recipeId = recipeId;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public Integer getPk() {
+        return pk;
+    }
+
+    public void setPk(Integer pk) {
+        this.pk = pk;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     @Override
@@ -40,33 +87,4 @@ public class Ingredient implements Parcelable {
                ", ingredient='" + ingredient + '\'' + '}';
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeFloat(this.quantity);
-        dest.writeString(this.measure);
-        dest.writeString(this.ingredient);
-    }
-
-    protected Ingredient(Parcel in) {
-        this.quantity = in.readFloat();
-        this.measure = in.readString();
-        this.ingredient = in.readString();
-    }
-
-    public static final Creator<Ingredient> CREATOR = new Creator<Ingredient>() {
-        @Override
-        public Ingredient createFromParcel(Parcel source) {
-            return new Ingredient(source);
-        }
-
-        @Override
-        public Ingredient[] newArray(int size) {
-            return new Ingredient[size];
-        }
-    };
 }

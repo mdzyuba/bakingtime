@@ -56,11 +56,10 @@ public class RecipeListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
+        ButterKnife.bind(this);
 
         recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
-
-        ButterKnife.bind(this);
     }
 
     /**

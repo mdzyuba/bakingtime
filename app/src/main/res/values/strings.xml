@@ -2,4 +2,5 @@
     <string name="app_name">Baking Time</string>
     <string name="title_recipe_details">Recipe Details</string>
     <string name="ingredients">Ingredients</string>
+    <string name="number_format">%1$d.</string>
 </resources>

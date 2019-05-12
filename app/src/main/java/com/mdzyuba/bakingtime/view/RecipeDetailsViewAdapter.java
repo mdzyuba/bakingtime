@@ -1,5 +1,6 @@
 package com.mdzyuba.bakingtime.view;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +46,7 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
     @Override
     public int getItemCount() {
         List<Step> steps = recipe.getSteps();
-        return steps.size();
+        return steps != null ? steps.size() : 0;
     }
 
     static class StepViewHolder extends RecyclerView.ViewHolder {
@@ -56,14 +57,17 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         @BindView(R.id.tv_name)
         TextView name;
 
-        public StepViewHolder(@NonNull View itemView) {
+        private final Context context;
+
+        StepViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            this.context = itemView.getContext();
         }
 
         void bind(Step step) {
             if (step.getId() > 0) {
-                stepId.setText(String.format("%d.", step.getId()));
+                stepId.setText(context.getString(R.string.number_format, step.getId()));
             }
             name.setText(step.getShortDescription());
         }

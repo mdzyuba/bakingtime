@@ -7,8 +7,12 @@ import android.view.ViewGroup;
 
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.view.RecipeDetailsViewAdapter;
+import com.mdzyuba.bakingtime.view.RecipeDetailsViewModel;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
@@ -25,15 +29,13 @@ public class RecipeDetailFragment extends Fragment {
      * The fragment argument representing the item ID that this fragment
      * represents.
      */
-    public static final String ARG_RECIPE = "recipe";
-
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private Recipe recipe;
+    public static final String ARG_RECIPE_ID = "recipeId";
+    public static final String ARG_RECIPE_NAME = "recipeName";
 
     @BindView(R.id.rv_details)
     RecyclerView recyclerView;
+
+    private RecipeDetailsViewModel detailsViewModel;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -46,13 +48,17 @@ public class RecipeDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments().containsKey(ARG_RECIPE)) {
-            recipe = getArguments().getParcelable(ARG_RECIPE);
+        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(ARG_RECIPE_ID)) {
+            Integer recipeId = arguments.getInt(ARG_RECIPE_ID);
+            detailsViewModel.loadRecipe(recipeId);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_details, container, false);
 
         ButterKnife.bind(this, rootView);
@@ -60,8 +66,13 @@ public class RecipeDetailFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe);
-        recyclerView.setAdapter(viewAdapter);
+        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe);
+                recyclerView.setAdapter(viewAdapter);
+            }
+        });
 
         return rootView;
     }

@@ -5,44 +5,107 @@ import android.net.Uri;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mdzyuba.bakingtime.db.IngredientDao;
+import com.mdzyuba.bakingtime.db.RecipeDao;
+import com.mdzyuba.bakingtime.db.RecipeDatabase;
+import com.mdzyuba.bakingtime.db.StepDao;
+import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
+import com.mdzyuba.bakingtime.model.Step;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import timber.log.Timber;
 
 public class RecipeFactory {
 
     private static final String RECIPES_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
     private static final String DELIMITER = "\\A";
 
-    public Collection<Recipe> loadRecipes(String json) {
+    private Collection<Recipe> loadRecipes(Context context, @Nullable String json) {
+        if (json == null) {
+            Timber.e("Unable to retrieve recipe data from the service");
+            // TODO: address the no network case
+            return new ArrayList<>();
+        }
         Gson gson = new Gson();
         Type collectionType = new TypeToken<Collection<Recipe>>(){}.getType();
-        return gson.fromJson(json, collectionType);
+        Collection<Recipe> recipes = gson.fromJson(json, collectionType);
+        updateChildParentReferences(recipes);
+        saveRecipesToDb(context, recipes);
+        return recipes;
+    }
+
+    private void saveRecipesToDb(Context context, Collection<Recipe> recipes) {
+        RecipeDatabase database = RecipeDatabase.getInstance(context);
+        RecipeDao recipeDao = database.recipeDao();
+        IngredientDao ingredientDao = database.ingredientDao();
+        StepDao stepDao = database.stepDao();
+        for (Recipe recipe: recipes) {
+            recipeDao.insert(recipe);
+            for (Step step: recipe.getSteps()) {
+                stepDao.insert(step);
+            }
+            for (Ingredient ingredient: recipe.getIngredients()) {
+                ingredientDao.insert(ingredient);
+            }
+        }
+    }
+
+    public Recipe loadRecipe(Context context, @NonNull Integer recipeId) {
+        RecipeDatabase database = RecipeDatabase.getInstance(context);
+        RecipeDao recipeDao = database.recipeDao();
+        Recipe recipe = recipeDao.loadRecipe(recipeId);
+
+        StepDao stepDao = database.stepDao();
+        List<Step> steps = stepDao.loadSteps(recipe.getId());
+        recipe.setSteps(steps);
+
+        IngredientDao ingredientDao = database.ingredientDao();
+        List<Ingredient> ingredients = ingredientDao.loadIngredients(recipe.getId());
+        recipe.setIngredients(ingredients);
+
+        return recipe;
+    }
+
+    private void updateChildParentReferences(Collection<Recipe> recipes) {
+        for (Recipe recipe: recipes) {
+            for (Step step: recipe.getSteps()) {
+                step.setRecipeId(recipe.getId());
+            }
+            int i = 1;
+            for (Ingredient ingredient: recipe.getIngredients()) {
+                ingredient.setId(i++);
+                ingredient.setRecipeId(recipe.getId());
+            }
+        }
     }
 
     public Collection<Recipe> loadRecipes(Context context) throws IOException {
         URL url = getUrl();
-        return loadRecipes(getResponseFromHttpUrl(context, url));
+        return loadRecipes(context, getResponseFromHttpUrl(context, url));
     }
 
     private URL getUrl() throws MalformedURLException {
         Uri uri = Uri.parse(RECIPES_URL).buildUpon().build();
-        URL url = new URL(uri.toString());
-        return url;
+        return new URL(uri.toString());
     }
 
-    public String getResponseFromHttpUrl(Context context, URL url) throws IOException {
+    private String getResponseFromHttpUrl(Context context, URL url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();

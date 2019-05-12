@@ -43,6 +43,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
 
     implementation "android.arch.persistence.room:runtime:$room_version"
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
 
     implementation "com.jakewharton:butterknife:$butterknife_version"
