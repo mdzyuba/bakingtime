@@ -4,4 +4,7 @@
     <dimen name="app_bar_height">200dp</dimen>
     <dimen name="item_width">200dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="text_size">16sp</dimen>
+    <dimen name="text_line_spacing">1sp</dimen>
+    <dimen name="image_button_width">50dp</dimen>
 </resources>

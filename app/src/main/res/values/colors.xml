@@ -5,4 +5,7 @@
     <color name="colorAccent">#D81B60</color>
     <color name="stepBackground">#E5E6F3</color>
     <color name="ingredientsTitleBackground">#E5F3E6</color>
+    <color name="buttonIconEnabled">#00574B</color>
+    <color name="buttonIconDisabled">#4D80CBC4</color>
+    <color name="buttonIconFocused">#00574B</color>
 </resources>

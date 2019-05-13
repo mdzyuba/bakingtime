@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeStepDetailsActivity;
@@ -23,14 +23,15 @@ import timber.log.Timber;
 public class RecipeStepDetailsFragment extends Fragment {
 
     public static final String ARG_RECIPE_STEP_ID = "stepId";
+    public static final String ARG_RECIPE_STEP_NAME = "stepName";
 
     private RecipeStepDetailsViewModel recipeStepDetailsViewModel;
 
     @BindView(R.id.button_next)
-    Button nextButton;
+    ImageButton nextButton;
 
     @BindView(R.id.button_prev)
-    Button prevButton;
+    ImageButton prevButton;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

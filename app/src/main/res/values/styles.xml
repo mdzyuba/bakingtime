@@ -17,6 +17,9 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="recipeTitle" parent="TextAppearance.AppCompat.Title">
+    </style>
+
     <style name="ingredientsTitle" parent="TextAppearance.AppCompat.Title">
     </style>
 
@@ -24,7 +27,8 @@
     </style>
 
     <style name="recipeStep" parent="TextAppearance.AppCompat.Title">
-        <item name="android:lineSpacingExtra">12sp</item>
+        <item name="android:lineSpacingExtra">@dimen/text_line_spacing</item>
+        <item name="android:textSize">@dimen/text_size</item>
     </style>
 
 </resources>

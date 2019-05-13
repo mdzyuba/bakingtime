@@ -18,7 +18,6 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:fontFamily="serif"
             android:text="@{viewModel.step.description}"
             android:textAlignment="textStart"
             app:layout_constraintEnd_toEndOf="parent"
@@ -26,27 +25,29 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="2. Combine the cake flour, 400 grams (2 cups) of sugar, baking powder, and 1 teaspoon of salt in the bowl of a stand mixer. Using the paddle attachment, beat at low speed until the dry ingredients are mixed together, about one minute" />
 
-        <Button
+        <ImageButton
             android:id="@+id/button_prev"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/image_button_width"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="24dp"
-            android:text="@string/previous"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/ic_navigate_before"
+            android:contentDescription="@string/previous"
             android:enabled="@{viewModel.previousStepAvailable}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/space"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <Button
+        <ImageButton
             android:id="@+id/button_next"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/image_button_width"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:text="@string/next"
+            android:contentDescription="@string/next"
             android:enabled="@{viewModel.nextStepAvailable}"
+            android:background="@drawable/ic_navigate_next"
             app:layout_constraintBottom_toBottomOf="@+id/button_prev"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/space" />
@@ -57,7 +58,7 @@
             android:layout_height="1dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             android:background="?android:attr/listDivider"
             app:layout_constraintBottom_toTopOf="@+id/button_prev"
             app:layout_constraintEnd_toEndOf="parent"

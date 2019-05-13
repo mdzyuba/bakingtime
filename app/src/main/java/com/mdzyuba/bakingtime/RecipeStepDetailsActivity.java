@@ -33,11 +33,18 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                                    .add(R.id.recipe_step_details_frame, recipeStepDetailsFragment)
                                    .commit();
+
+
+        String stepName = getIntent().getStringExtra(RecipeStepDetailsFragment.ARG_RECIPE_STEP_NAME);
+        if (stepName != null) {
+            setTitle(stepName);
+        }
     }
 
     public static void startActivity(Context context, @NonNull Step step) {
         Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
         intent.putExtra(RecipeStepDetailsFragment.ARG_RECIPE_STEP_ID, step.getPk());
+        intent.putExtra(RecipeStepDetailsFragment.ARG_RECIPE_STEP_NAME, step.getShortDescription());
         context.startActivity(intent);
     }
 
