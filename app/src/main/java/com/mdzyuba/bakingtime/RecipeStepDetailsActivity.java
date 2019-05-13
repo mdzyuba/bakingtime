@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -34,7 +35,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
                                    .commit();
     }
 
-    public static void startActivity(Context context, Step step) {
+    public static void startActivity(Context context, @NonNull Step step) {
         Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
         intent.putExtra(RecipeStepDetailsFragment.ARG_RECIPE_STEP_ID, step.getPk());
         context.startActivity(intent);

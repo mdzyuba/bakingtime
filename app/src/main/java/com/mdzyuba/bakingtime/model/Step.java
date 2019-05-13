@@ -1,5 +1,7 @@
 package com.mdzyuba.bakingtime.model;
 
+import java.util.Objects;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.room.Entity;
@@ -94,5 +96,24 @@ public class Step {
         return "Step{" + "id=" + id + ", shortDescription='" + shortDescription + '\'' +
                ", description='" + description + '\'' + ", videoURL='" + videoURL + '\'' +
                ", thumbnailURL='" + thumbnailURL + '\'' + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Step)) return false;
+        Step step = (Step) o;
+        return Objects.equals(pk, step.pk) && id.equals(step.id) &&
+               recipeId.equals(step.recipeId) &&
+               Objects.equals(shortDescription, step.shortDescription) &&
+               Objects.equals(description, step.description) &&
+               Objects.equals(videoURL, step.videoURL) &&
+               Objects.equals(thumbnailURL, step.thumbnailURL);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+                .hash(pk, id, recipeId, shortDescription, description, videoURL, thumbnailURL);
     }
 }
