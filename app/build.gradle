@@ -34,6 +34,7 @@ dependencies {
     def butterknife_version = '10.1.0'
     def room_version = "1.1.1"
     def lifecycle_version = "2.0.0"
+    def exo_player = "2.10.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
@@ -57,6 +58,8 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:okhttp:3.14.1'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
+
+    implementation "com.google.android.exoplayer:exoplayer:$exo_player"
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.hamcrest:hamcrest:2.1'

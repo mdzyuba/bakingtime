@@ -5,8 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
+import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -15,7 +17,10 @@ import androidx.appcompat.app.AppCompatActivity;
 /**
  * Displays a Recipe Step information.
  */
-public class RecipeStepDetailsActivity extends AppCompatActivity {
+public class RecipeStepDetailsActivity extends AppCompatActivity implements
+                                                                 RecipeStepDetailsFragment.PlayerProvider {
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +38,6 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
         getSupportFragmentManager().beginTransaction()
                                    .add(R.id.recipe_step_details_frame, recipeStepDetailsFragment)
                                    .commit();
-
 
         String stepName = getIntent().getStringExtra(RecipeStepDetailsFragment.ARG_RECIPE_STEP_NAME);
         if (stepName != null) {
@@ -62,5 +66,16 @@ public class RecipeStepDetailsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VideoPlayerSingleton.getInstance(this).releasePlayer();
+    }
+
+    @Override
+    public SimpleExoPlayer getPlayer() {
+        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
     }
 }
