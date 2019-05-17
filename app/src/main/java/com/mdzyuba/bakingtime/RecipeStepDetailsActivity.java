@@ -2,6 +2,7 @@ package com.mdzyuba.bakingtime;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -20,8 +21,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class RecipeStepDetailsActivity extends AppCompatActivity implements
                                                                  RecipeStepDetailsFragment.PlayerProvider {
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +29,11 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            if (isLandscapeOrientation()) {
+                actionBar.hide();
+            } else {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
 
         RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
@@ -77,5 +80,10 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
     @Override
     public SimpleExoPlayer getPlayer() {
         return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
+    }
+
+    private boolean isLandscapeOrientation() {
+        int orientation = getResources().getConfiguration().orientation;
+        return orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 }

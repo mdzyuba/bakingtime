@@ -1,5 +1,7 @@
 package com.mdzyuba.bakingtime.view.step;
 
+import android.content.Context;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -46,18 +48,22 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     private PlayerEventListener playerEventListener;
 
+    @Nullable
     @BindView(R.id.button_next)
     ImageButton nextButton;
 
+    @Nullable
     @BindView(R.id.button_prev)
     ImageButton prevButton;
 
     @BindView(R.id.video_player)
     PlayerView playerView;
 
+    @Nullable
     @BindView(R.id.guideline)
     Guideline guideline;
 
+    @Nullable
     @BindView(R.id.tv_description)
     TextView description;
 
@@ -76,8 +82,10 @@ public class RecipeStepDetailsFragment extends Fragment {
         ButterKnife.bind(this, rootView);
         viewBinding.setLifecycleOwner(this);
         viewBinding.setViewModel(recipeStepDetailsViewModel);
-        nextButton.setOnClickListener(v -> onNextStepClick());
-        prevButton.setOnClickListener(v -> onPreviousStepClick());
+        if (nextButton != null && prevButton != null) {
+            nextButton.setOnClickListener(v -> onNextStepClick());
+            prevButton.setOnClickListener(v -> onPreviousStepClick());
+        }
         return rootView;
     }
 
@@ -116,15 +124,20 @@ public class RecipeStepDetailsFragment extends Fragment {
             hidePlayer();
             return;
         }
-        Uri videoUri = Uri.parse(uri);
-        SimpleExoPlayer exoPlayer = ((PlayerProvider) getActivity()).getPlayer();
+        Context context = getContext();
+        PlayerProvider activity = (PlayerProvider) getActivity();
+        if (activity == null || context == null) {
+            return;
+        }
+        SimpleExoPlayer exoPlayer = activity.getPlayer();
 
         playerView.setPlayer(exoPlayer);
 
-        String userAgent = Util.getUserAgent(getContext(), "ExoPlayer");
+        String userAgent = Util.getUserAgent(context, "ExoPlayer");
         DefaultDataSourceFactory dataSourceFactory =
-                new DefaultDataSourceFactory(getContext(), userAgent);
+                new DefaultDataSourceFactory(context, userAgent);
 
+        Uri videoUri = Uri.parse(uri);
         MediaSource mediaSource =
                 new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(videoUri);
 
@@ -142,8 +155,19 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     private void hidePlayer() {
         playerView.setVisibility(View.GONE);
-        guideline.setVisibility(View.GONE);
-        guideline.setGuidelinePercent(0f);
+        if (guideline != null) {
+            guideline.setVisibility(View.GONE);
+            guideline.setGuidelinePercent(0f);
+        }
+        if (description != null && isLandscapeOrientation() &&
+            description.getVisibility() == View.GONE) {
+            description.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean isLandscapeOrientation() {
+        int orientation = getResources().getConfiguration().orientation;
+        return orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
 
     private class PlayerEventListener implements Player.EventListener {
@@ -160,7 +184,7 @@ public class RecipeStepDetailsFragment extends Fragment {
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
-            Timber.d("Loading " + isLoading);
+            Timber.d("Loading %s", isLoading);
         }
 
         @Override
@@ -180,10 +204,13 @@ public class RecipeStepDetailsFragment extends Fragment {
 
         @Override
         public void onPlayerError(ExoPlaybackException error) {
-            Timber.e("Player error: " + error);
+            Timber.e(error,"Player error: %s", error.getMessage());
             hidePlayer();
-            SimpleExoPlayer exoPlayer = ((PlayerProvider) getActivity()).getPlayer();
-            exoPlayer.removeListener(playerEventListener);
+            PlayerProvider activity = (PlayerProvider) getActivity();
+            if (activity != null) {
+                SimpleExoPlayer exoPlayer = activity.getPlayer();
+                exoPlayer.removeListener(playerEventListener);
+            }
         }
 
         @Override
