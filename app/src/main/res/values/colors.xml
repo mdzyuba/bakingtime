@@ -8,4 +8,10 @@
     <color name="buttonIconEnabled">#00574B</color>
     <color name="buttonIconDisabled">#4D80CBC4</color>
     <color name="buttonIconFocused">#00574B</color>
+
+    <color name="buttonCircleEnabled">@color/cardview_light_background</color>
+    <color name="buttonCircleDisabled">@color/cardview_light_background</color>
+    <color name="buttonArrowEnabled">@color/colorPrimary</color>
+    <color name="buttonArrowDisabled">@color/cardview_light_background</color>
+
 </resources>

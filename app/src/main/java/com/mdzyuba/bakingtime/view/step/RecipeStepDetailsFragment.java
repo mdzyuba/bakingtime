@@ -5,7 +5,9 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -31,9 +33,12 @@ import com.mdzyuba.bakingtime.model.Step;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Guideline;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.ViewModelProviders;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -67,10 +72,51 @@ public class RecipeStepDetailsFragment extends Fragment {
     @BindView(R.id.tv_description)
     TextView description;
 
+    @BindView(R.id.step_details_page)
+    ConstraintLayout constraintLayout;
+
+    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
+
+        private static final int SWIPE = 50;
+        private static final int VELOCITY = 100;
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            float diffY = e2.getY() - e1.getY();
+            Timber.d("diff %f velocity y: %f", diffY, velocityY);
+            boolean result = false;
+            if (Math.abs(diffY) > SWIPE || Math.abs(velocityY) > VELOCITY) {
+                if (diffY > 0) {
+                    // swipe right
+                    onNextStepClick();
+                } else {
+                    // swipe left
+                    onPreviousStepClick();
+                }
+                result = true;
+            }
+            return result;
+        }
+    };
+
+    private View.OnTouchListener onTouchListener;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         recipeStepDetailsViewModel = ViewModelProviders.of(this).get(RecipeStepDetailsViewModel.class);
+        final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(getContext(), gestureListener);
+        onTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                gestureDetector.onTouchEvent(event);
+                FragmentActivity activity = getActivity();
+                if (activity == null) {
+                    return true;
+                }
+                return activity.onTouchEvent(event);
+            }
+        };
     }
 
     @Override
@@ -85,6 +131,9 @@ public class RecipeStepDetailsFragment extends Fragment {
         if (nextButton != null && prevButton != null) {
             nextButton.setOnClickListener(v -> onNextStepClick());
             prevButton.setOnClickListener(v -> onPreviousStepClick());
+        }
+        if (isLandscapeOrientation()) {
+            playerView.setOnTouchListener(onTouchListener);
         }
         return rootView;
     }
@@ -162,6 +211,7 @@ public class RecipeStepDetailsFragment extends Fragment {
         if (description != null && isLandscapeOrientation() &&
             description.getVisibility() == View.GONE) {
             description.setVisibility(View.VISIBLE);
+            constraintLayout.setOnTouchListener(onTouchListener);
         }
     }
 

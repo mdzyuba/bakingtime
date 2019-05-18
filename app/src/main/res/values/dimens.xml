@@ -6,5 +6,5 @@
     <dimen name="text_margin">16dp</dimen>
     <dimen name="text_size">16sp</dimen>
     <dimen name="text_line_spacing">1sp</dimen>
-    <dimen name="image_button_width">50dp</dimen>
+    <dimen name="image_button_width">48dp</dimen>
 </resources>
