@@ -1,21 +1,19 @@
 package com.mdzyuba.bakingtime.view.details;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
-import com.mdzyuba.bakingtime.RecipeStepDetailsActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
-import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 
 import java.util.List;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,16 +23,21 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
 
     private final Recipe recipe;
 
-    public RecipeDetailsViewAdapter(Recipe recipe) {
+    private final RecipeStepSelectorListener itemDetailsSelectorListener;
+
+    public RecipeDetailsViewAdapter(Recipe recipe, @Nullable
+            RecipeStepSelectorListener itemDetailsSelectorListener) {
         this.recipe = recipe;
+        this.itemDetailsSelectorListener = itemDetailsSelectorListener;
     }
 
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Step step = (Step) view.getTag();
-            Context context = view.getContext();
-            RecipeStepDetailsActivity.startActivity(context, step);
+            if (itemDetailsSelectorListener != null) {
+                itemDetailsSelectorListener.onStepSelected(step);
+            }
         }
     };
 

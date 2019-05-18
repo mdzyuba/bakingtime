@@ -3,11 +3,20 @@ package com.mdzyuba.bakingtime;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
+import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
+import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -15,9 +24,20 @@ import butterknife.ButterKnife;
  *
  * A click on a Recipe Step will open RecipeStepDetailsActivity.
  */
-public class RecipeDetailActivity extends AppCompatActivity {
+public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener,
+                                                                       RecipeStepDetailsFragment.PlayerProvider {
 
     private String recipeName;
+
+    /**
+     * The detail container view will be present only in the
+     * large-screen layouts (res/values-w900dp).
+     * If this view is present, then the
+     * activity should be in two-pane mode.
+     */
+    @Nullable
+    @BindView(R.id.step_details_container)
+    FrameLayout dualPaneFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,5 +93,44 @@ public class RecipeDetailActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStepSelected(@NonNull Step step) {
+        if (isTwoPane()) {
+            Bundle arguments = new Bundle();
+            arguments.putInt(RecipeStepDetailsFragment.ARG_RECIPE_STEP_ID, step.getPk());
+            arguments.putString(RecipeStepDetailsFragment.ARG_RECIPE_STEP_NAME, step.getShortDescription());
+
+            RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
+            recipeStepDetailsFragment.setArguments(arguments);
+            recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
+
+            getSupportFragmentManager().beginTransaction()
+                                       .replace(R.id.step_details_container, recipeStepDetailsFragment)
+                                       .commit();
+        } else {
+            RecipeStepDetailsActivity.startActivity(this, step);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VideoPlayerSingleton.getInstance(this).releasePlayer();
+    }
+
+    @Override
+    public SimpleExoPlayer getPlayer() {
+        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
+    }
+
+    /**
+     * Checks if the device screen wide enough to hold two panes for the list and details views.
+     *
+     * @return true if two panes is supported.
+     */
+    private boolean isTwoPane() {
+        return dualPaneFrame != null;
     }
 }

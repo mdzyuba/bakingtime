@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
@@ -19,7 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
  * Displays a Recipe Step information.
  */
 public class RecipeStepDetailsActivity extends AppCompatActivity implements
-                                                                 RecipeStepDetailsFragment.PlayerProvider {
+                                                                 RecipeStepDetailsFragment.PlayerProvider,
+                                                                 RecipeStepSelectorListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
 
         RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
         recipeStepDetailsFragment.setArguments(getIntent().getExtras());
+        recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
         getSupportFragmentManager().beginTransaction()
                                    .add(R.id.recipe_step_details_frame, recipeStepDetailsFragment)
                                    .commit();
@@ -82,8 +85,14 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
     }
 
+    @Override
+    public void onStepSelected(@NonNull Step step) {
+        RecipeStepDetailsActivity.startActivity(this, step);
+    }
+
     private boolean isLandscapeOrientation() {
         int orientation = getResources().getConfiguration().orientation;
         return orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
+
 }

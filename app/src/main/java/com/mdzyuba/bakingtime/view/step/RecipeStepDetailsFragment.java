@@ -27,9 +27,9 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.mdzyuba.bakingtime.R;
-import com.mdzyuba.bakingtime.RecipeStepDetailsActivity;
 import com.mdzyuba.bakingtime.databinding.RecipeStepDetailsFragmentBinding;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -52,6 +52,8 @@ public class RecipeStepDetailsFragment extends Fragment {
     private RecipeStepDetailsViewModel recipeStepDetailsViewModel;
 
     private PlayerEventListener playerEventListener;
+
+    private RecipeStepSelectorListener itemDetailsSelectorListener;
 
     @Nullable
     @BindView(R.id.button_next)
@@ -163,8 +165,8 @@ public class RecipeStepDetailsFragment extends Fragment {
     }
 
     private void showStep(Step step) {
-        if (step != null) {
-            RecipeStepDetailsActivity.startActivity(getContext(), step);
+        if (step != null && itemDetailsSelectorListener != null) {
+            itemDetailsSelectorListener.onStepSelected(step);
         }
     }
 
@@ -277,6 +279,11 @@ public class RecipeStepDetailsFragment extends Fragment {
         public void onSeekProcessed() {
 
         }
+    }
+
+    public void setItemDetailsSelectorListener(
+            RecipeStepSelectorListener itemDetailsSelectorListener) {
+        this.itemDetailsSelectorListener = itemDetailsSelectorListener;
     }
 
     public interface PlayerProvider {

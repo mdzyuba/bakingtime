@@ -12,6 +12,7 @@ import com.mdzyuba.bakingtime.model.Recipe;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -37,6 +38,7 @@ public class RecipeDetailFragment extends Fragment {
     RecyclerView recyclerView;
 
     private RecipeDetailsViewModel detailsViewModel;
+    private RecipeStepSelectorListener itemDetailsSelectorListener;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -57,6 +59,11 @@ public class RecipeDetailFragment extends Fragment {
             Integer recipeId = arguments.getInt(ARG_RECIPE_ID);
             detailsViewModel.loadRecipe(recipeId);
         }
+
+        FragmentActivity activity = getActivity();
+        if (activity instanceof RecipeStepSelectorListener) {
+            itemDetailsSelectorListener = (RecipeStepSelectorListener) activity;
+        }
     }
 
     @Override
@@ -71,7 +78,7 @@ public class RecipeDetailFragment extends Fragment {
         Observer<Recipe> recipeObserver = new Observer<Recipe>() {
             @Override
             public void onChanged(Recipe recipe) {
-                RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe);
+                RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe, itemDetailsSelectorListener);
                 recyclerView.setAdapter(viewAdapter);
             }
         };
