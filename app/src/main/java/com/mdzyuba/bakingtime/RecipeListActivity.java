@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,6 +58,12 @@ public class RecipeListActivity extends AppCompatActivity {
 
         recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
+
+        int columns = getResources().getInteger(R.integer.recipe_grid_columns);
+        if (columns > 1) {
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(this, columns);
+            recyclerView.setLayoutManager(gridLayoutManager);
+        }
     }
 
     /**
