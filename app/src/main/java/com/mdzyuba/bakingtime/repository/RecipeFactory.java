@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.mdzyuba.bakingtime.BuildConfig;
 import com.mdzyuba.bakingtime.db.IngredientDao;
 import com.mdzyuba.bakingtime.db.RecipeDao;
 import com.mdzyuba.bakingtime.db.RecipeDatabase;
@@ -33,7 +34,7 @@ import timber.log.Timber;
 
 public class RecipeFactory {
 
-    private static final String RECIPES_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+    private static final String RECIPES_URL = BuildConfig.BAKER_URL;
     private static final String DELIMITER = "\\A";
 
     private Collection<Recipe> loadRecipes(Context context, @Nullable String json) {
