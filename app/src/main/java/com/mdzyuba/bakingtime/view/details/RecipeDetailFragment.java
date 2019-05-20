@@ -9,6 +9,7 @@ import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeDetailActivity;
 import com.mdzyuba.bakingtime.RecipeListActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
+import com.mdzyuba.bakingtime.model.Step;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * A fragment representing a single Item detail screen.
@@ -32,13 +34,14 @@ public class RecipeDetailFragment extends Fragment {
      * represents.
      */
     public static final String ARG_RECIPE_ID = "recipeId";
-    public static final String ARG_RECIPE_NAME = "recipeName";
+    public static final String ARG_STEP_INDEX = "stepIndex";
 
     @BindView(R.id.rv_details)
     RecyclerView recyclerView;
 
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
+    private RecipeDetailsViewAdapter viewAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,19 +54,52 @@ public class RecipeDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        detailsViewModel = ViewModelProviders.of(this)
-                                             .get(RecipeDetailsViewModel.class);
-
-        Bundle arguments = getArguments();
-        if (arguments != null && arguments.containsKey(ARG_RECIPE_ID)) {
-            Integer recipeId = arguments.getInt(ARG_RECIPE_ID);
-            detailsViewModel.loadRecipe(recipeId);
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Timber.e("The activity is null. Unable to create the fragment.");
+            return;
         }
 
-        FragmentActivity activity = getActivity();
+        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
+
+        if (savedInstanceState == null) {
+            Bundle arguments = getArguments();
+            if (arguments != null && arguments.containsKey(ARG_RECIPE_ID)) {
+                int recipeId = arguments.getInt(ARG_RECIPE_ID);
+                if (detailsViewModel.getRecipe().getValue() == null ||
+                    recipeId != detailsViewModel.getRecipe().getValue().getId()) {
+                    detailsViewModel.loadRecipe(recipeId);
+                }
+            }
+        }
+
         if (activity instanceof RecipeStepSelectorListener) {
             itemDetailsSelectorListener = (RecipeStepSelectorListener) activity;
         }
+
+        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                Bundle arguments = getArguments();
+                if (arguments == null) {
+                    Timber.e("The fragment arguments are null. Unable to init the Recipe step.");
+                    return;
+                }
+                int stepIndex = arguments.getInt(RecipeDetailFragment.ARG_STEP_INDEX, 0);
+                Timber.d("Setting a step index %d", stepIndex);
+                detailsViewModel.setStepIndex(stepIndex);
+            }
+        });
+
+        detailsViewModel.getStep().observe(this, new Observer<Step>() {
+            @Override
+            public void onChanged(Step step) {
+                Timber.d("step changed - setSelectedStepPk: %s", step);
+                if (viewAdapter != null) {
+                    viewAdapter.setSelectedStepPk(step.getPk());
+                }
+            }
+        });
     }
 
     @Override
@@ -78,7 +114,7 @@ public class RecipeDetailFragment extends Fragment {
         Observer<Recipe> recipeObserver = new Observer<Recipe>() {
             @Override
             public void onChanged(Recipe recipe) {
-                RecipeDetailsViewAdapter viewAdapter = new RecipeDetailsViewAdapter(recipe, itemDetailsSelectorListener);
+                viewAdapter = new RecipeDetailsViewAdapter(recipe, itemDetailsSelectorListener);
                 recyclerView.setAdapter(viewAdapter);
             }
         };
@@ -87,4 +123,5 @@ public class RecipeDetailFragment extends Fragment {
 
         return rootView;
     }
+
 }

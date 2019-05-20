@@ -28,7 +28,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.databinding.RecipeStepDetailsFragmentBinding;
+import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
+import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 
 import androidx.annotation.NonNull;
@@ -39,6 +42,7 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,10 +50,7 @@ import timber.log.Timber;
 
 public class RecipeStepDetailsFragment extends Fragment {
 
-    public static final String ARG_RECIPE_STEP_ID = "stepId";
-    public static final String ARG_RECIPE_STEP_NAME = "stepName";
-
-    private RecipeStepDetailsViewModel recipeStepDetailsViewModel;
+    private RecipeDetailsViewModel detailsViewModel;
 
     private PlayerEventListener playerEventListener;
 
@@ -106,16 +107,44 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        recipeStepDetailsViewModel = ViewModelProviders.of(this).get(RecipeStepDetailsViewModel.class);
+        final FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Timber.e("The activity is null.");
+            return;
+        }
+        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
+
+        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                detailsViewModel.getRecipe().removeObserver(this);
+                Bundle arguments = getArguments();
+                if (arguments == null) {
+                    Timber.e("The fragment arguments are null.");
+                    return;
+                }
+                int stepIndex = arguments.getInt(RecipeDetailFragment.ARG_STEP_INDEX, 0);
+                Timber.d("step index: %d, model step: %s", stepIndex, detailsViewModel.getStep().getValue());
+                if (detailsViewModel.getStep().getValue() != null && detailsViewModel.getStepIndex(detailsViewModel.getStep().getValue()) != stepIndex) {
+                    detailsViewModel.setStepIndex(stepIndex);
+                }
+            }
+        });
+
+        detailsViewModel.getStep().observe(this, new Observer<Step>() {
+            @Override
+            public void onChanged(Step step) {
+                detailsViewModel.getStep().removeObserver(this);
+                Timber.d("step changed - initializePlayer: %s", step);
+                initializePlayer(step.getVideoURL());
+            }
+        });
+
         final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(getContext(), gestureListener);
         onTouchListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
-                FragmentActivity activity = getActivity();
-                if (activity == null) {
-                    return true;
-                }
                 return activity.onTouchEvent(event);
             }
         };
@@ -129,7 +158,7 @@ public class RecipeStepDetailsFragment extends Fragment {
         View rootView = viewBinding.getRoot();
         ButterKnife.bind(this, rootView);
         viewBinding.setLifecycleOwner(this);
-        viewBinding.setViewModel(recipeStepDetailsViewModel);
+        viewBinding.setViewModel(detailsViewModel);
         if (nextButton != null && prevButton != null) {
             nextButton.setOnClickListener(v -> onNextStepClick());
             prevButton.setOnClickListener(v -> onPreviousStepClick());
@@ -143,24 +172,19 @@ public class RecipeStepDetailsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Bundle arguments = getArguments();
-        recipeStepDetailsViewModel.step.observe(this, step -> {
-            Timber.d("step: %s", step);
-            initializePlayer(step.getVideoURL());
-        });
-        if (arguments != null && arguments.containsKey(ARG_RECIPE_STEP_ID)) {
-            int stepPk = arguments.getInt(ARG_RECIPE_STEP_ID);
-            recipeStepDetailsViewModel.loadStep(stepPk);
-        }
+//        detailsViewModel.getStep().observe(this, step -> {
+//            Timber.d("step changed: %s", step);
+//            initializePlayer(step.getVideoURL());
+//        });
     }
 
     private void onNextStepClick() {
-        Step step = recipeStepDetailsViewModel.getNextStep();
+        Step step = detailsViewModel.getNextStep();
         showStep(step);
     }
 
     private void onPreviousStepClick() {
-        Step step = recipeStepDetailsViewModel.getPrevStep();
+        Step step = detailsViewModel.getPrevStep();
         showStep(step);
     }
 
@@ -175,6 +199,7 @@ public class RecipeStepDetailsFragment extends Fragment {
             hidePlayer();
             return;
         }
+        Timber.d("init player: %s", uri);
         Context context = getContext();
         PlayerProvider activity = (PlayerProvider) getActivity();
         if (activity == null || context == null) {

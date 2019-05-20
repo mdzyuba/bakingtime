@@ -1,14 +1,17 @@
 package com.mdzyuba.bakingtime;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
-import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
+import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
+import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
@@ -16,18 +19,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Displays a Recipe ingredients and steps.
  *
  * A click on a Recipe Step will open RecipeStepDetailsActivity.
+ *
+ * The activity requires RecipeDetailFragment.ARG_RECIPE_ID parameter.
  */
 public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener,
                                                                        RecipeStepDetailsFragment.PlayerProvider {
 
-    private String recipeName;
+    private RecipeDetailsViewModel detailsViewModel;
 
     /**
      * The detail container view will be present only in the
@@ -39,17 +47,28 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @BindView(R.id.step_details_container)
     FrameLayout dualPaneFrame;
 
+    public static void startActivityWithStep(Context context, int recipeId, int stepIndex) {
+        Intent intent = new Intent(context, RecipeDetailActivity.class);
+        intent.putExtra(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
+        intent.putExtra(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_details_frame);
 
+        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+
         ButterKnife.bind(this);
 
-        if (recipeName == null) {
-            recipeName = getIntent().getStringExtra(RecipeDetailFragment.ARG_RECIPE_NAME);
-        }
-        setTitle(recipeName);
+        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
+            @Override
+            public void onChanged(Recipe recipe) {
+                setTitle(recipe.getName());
+            }
+        });
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -67,15 +86,17 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         // http://developer.android.com/guide/components/fragments.html
         //
         if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            Bundle arguments = new Bundle();
-            int recipeId = getIntent().getIntExtra(RecipeDetailFragment.ARG_RECIPE_ID, 0);
-            arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
-            RecipeDetailFragment fragment = new RecipeDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)
-                                       .commit();
+            showRecipeDetailsFragment();
+
+            if (isTwoPane()) {
+                detailsViewModel.getStep().observe(this, new Observer<Step>() {
+                    @Override
+                    public void onChanged(Step step) {
+                        detailsViewModel.getStep().removeObserver(this);
+                        showStepDetailsFragment(step);
+                    }
+                });
+            }
         }
     }
 
@@ -97,21 +118,52 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
 
     @Override
     public void onStepSelected(@NonNull Step step) {
+        Timber.d("Step selected: %s", step);
+        detailsViewModel.setStepIndex(detailsViewModel.getStepIndex(step));
         if (isTwoPane()) {
-            Bundle arguments = new Bundle();
-            arguments.putInt(RecipeStepDetailsFragment.ARG_RECIPE_STEP_ID, step.getPk());
-            arguments.putString(RecipeStepDetailsFragment.ARG_RECIPE_STEP_NAME, step.getShortDescription());
-
-            RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
-            recipeStepDetailsFragment.setArguments(arguments);
-            recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
-
-            getSupportFragmentManager().beginTransaction()
-                                       .replace(R.id.step_details_container, recipeStepDetailsFragment)
-                                       .commit();
+            // TODO: try not reloading details fragment in the landscape mode. Update UI based on the model.
+            Timber.d("showStepDetailsFragment");
+            showStepDetailsFragment(step);
         } else {
-            RecipeStepDetailsActivity.startActivity(this, step);
+            Timber.d("start RecipeStepDetailsActivity");
+            Recipe recipe = detailsViewModel.getRecipe().getValue();
+            if (recipe == null) {
+                Timber.e("The recipe should be initialized");
+                return;
+            }
+            RecipeStepDetailsActivity.startActivityWithStep(this, recipe.getId(),
+                                                            detailsViewModel.getStepIndex(step));
         }
+    }
+
+    private void showRecipeDetailsFragment() {
+        Bundle arguments = new Bundle();
+        int recipeId = getIntent().getIntExtra(RecipeDetailFragment.ARG_RECIPE_ID, 0);
+        int stepIndex = getIntent().getIntExtra(RecipeDetailFragment.ARG_STEP_INDEX, 0);
+        arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
+        arguments.putInt(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        Timber.d("show RecipeDetailFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
+        RecipeDetailFragment fragment = new RecipeDetailFragment();
+        fragment.setArguments(arguments);
+        getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)
+                                   .commit();
+    }
+
+    private void showStepDetailsFragment(Step step) {
+        Bundle arguments = new Bundle();
+        int recipeId = step.getRecipeId();
+        int stepIndex = detailsViewModel.getStepIndex(step);
+        Timber.d("show RecipeStepDetailsFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
+        arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
+        arguments.putInt(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+
+        RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
+        recipeStepDetailsFragment.setArguments(arguments);
+        recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
+
+        getSupportFragmentManager().beginTransaction()
+                                   .replace(R.id.step_details_container, recipeStepDetailsFragment)
+                                   .commit();
     }
 
     @Override

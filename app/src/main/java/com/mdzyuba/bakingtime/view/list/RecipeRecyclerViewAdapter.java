@@ -1,16 +1,11 @@
 package com.mdzyuba.bakingtime.view.list;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
-import com.mdzyuba.bakingtime.RecipeDetailActivity;
-import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.RecipeListActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
 
@@ -23,37 +18,20 @@ import butterknife.ButterKnife;
 
 public class RecipeRecyclerViewAdapter extends RecyclerView.Adapter<RecipeRecyclerViewAdapter.RecipeViewHolder> {
 
-    private final RecipeListActivity mParentActivity;
     private final List<Recipe> recipes;
-    private final boolean twoPane;
+    private final RecipeSelectorListener recipeSelectorListener;
 
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Recipe recipe = (Recipe) view.getTag();
-            if (twoPane) {
-                Bundle arguments = new Bundle();
-                arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipe.getId());
-                arguments.putString(RecipeDetailFragment.ARG_RECIPE_NAME, recipe.getName());
-                RecipeDetailFragment fragment = new RecipeDetailFragment();
-                fragment.setArguments(arguments);
-                mParentActivity.getSupportFragmentManager().beginTransaction()
-                               .add(R.id.item_detail_container, fragment).commit();
-            } else {
-                Context context = view.getContext();
-                Intent intent = new Intent(context, RecipeDetailActivity.class);
-                intent.putExtra(RecipeDetailFragment.ARG_RECIPE_ID, recipe.getId());
-                intent.putExtra(RecipeDetailFragment.ARG_RECIPE_NAME, recipe.getName());
-                context.startActivity(intent);
-            }
+            recipeSelectorListener.onRecipeSelected(recipe);
         }
     };
 
-    public RecipeRecyclerViewAdapter(RecipeListActivity mParentActivity, List<Recipe> recipes,
-                                     boolean mTwoPane) {
-        this.mParentActivity = mParentActivity;
+    public RecipeRecyclerViewAdapter(RecipeListActivity mParentActivity, List<Recipe> recipes) {
         this.recipes = recipes;
-        this.twoPane = mTwoPane;
+        this.recipeSelectorListener = mParentActivity;
     }
 
     @NonNull

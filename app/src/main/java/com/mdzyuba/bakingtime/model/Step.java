@@ -83,11 +83,12 @@ public class Step {
         this.recipeId = recipeId;
     }
 
+    @NonNull
     public Integer getPk() {
         return pk;
     }
 
-    public void setPk(Integer pk) {
+    public void setPk(@NonNull Integer pk) {
         this.pk = pk;
     }
 

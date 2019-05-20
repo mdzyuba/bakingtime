@@ -22,8 +22,9 @@ import butterknife.ButterKnife;
 public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetailsViewAdapter.StepViewHolder> {
 
     private final Recipe recipe;
-
     private final RecipeStepSelectorListener itemDetailsSelectorListener;
+    private int selectedStepPk;
+    private int previouslySelectedItemIndex = -1;
 
     public RecipeDetailsViewAdapter(Recipe recipe, @Nullable
             RecipeStepSelectorListener itemDetailsSelectorListener) {
@@ -55,7 +56,7 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
     public void onBindViewHolder(@NonNull StepViewHolder holder, int position) {
         List<Step> steps = recipe.getSteps();
         Step step = steps.get(position);
-        holder.bind(step);
+        holder.bind(step, selectedStepPk);
         holder.itemView.setTag(step);
         holder.itemView.setOnClickListener(onClickListener);
     }
@@ -64,6 +65,22 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
     public int getItemCount() {
         List<Step> steps = recipe.getSteps();
         return steps != null ? steps.size() : 0;
+    }
+
+    // TODO: change to the step index. Also add a scroll to the selected item.
+    public void setSelectedStepPk(int selectedStepPk) {
+        this.selectedStepPk = selectedStepPk;
+        for (int i = 0; i < recipe.getSteps().size(); i++) {
+            Step step = recipe.getSteps().get(i);
+            if (step.getPk() == selectedStepPk) {
+                if (previouslySelectedItemIndex != i) {
+                    notifyItemChanged(previouslySelectedItemIndex);
+                    previouslySelectedItemIndex = i;
+                }
+                notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     static class StepViewHolder extends RecyclerView.ViewHolder {
@@ -82,11 +99,18 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
             this.context = itemView.getContext();
         }
 
-        void bind(Step step) {
+        void bind(Step step, int selectedStepPk) {
             if (step.getId() > 0) {
                 stepId.setText(context.getString(R.string.number_format, step.getId()));
+            } else {
+                stepId.setText("");
             }
             name.setText(step.getShortDescription());
+            if (step.getPk() == selectedStepPk) {
+                itemView.setSelected(true);
+            } else {
+                itemView.setSelected(false);
+            }
         }
     }
 }

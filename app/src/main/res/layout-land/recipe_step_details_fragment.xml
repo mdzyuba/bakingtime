@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
     <data>
-        <variable name="viewModel" type="com.mdzyuba.bakingtime.view.step.RecipeStepDetailsViewModel"/>
+        <variable name="viewModel" type="com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel"/>
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

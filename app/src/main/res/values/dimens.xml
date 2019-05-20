@@ -8,4 +8,5 @@
     <dimen name="text_line_spacing">1sp</dimen>
     <dimen name="image_button_width">48dp</dimen>
     <integer name="recipe_grid_columns">1</integer>
+    <bool name="dual_pane_mode">false</bool>
 </resources>
