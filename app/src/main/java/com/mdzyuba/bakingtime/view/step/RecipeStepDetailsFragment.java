@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -14,8 +16,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.PlaybackParameters;
-import com.google.android.exoplayer2.PlaybackPreparer;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
@@ -49,12 +51,17 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class RecipeStepDetailsFragment extends Fragment {
+    private static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
 
     private RecipeDetailsViewModel detailsViewModel;
 
     private PlayerEventListener playerEventListener;
 
     private RecipeStepSelectorListener itemDetailsSelectorListener;
+
+    private SimpleExoPlayer exoPlayer;
+    private MediaSessionCompat mediaSession;
+    private PlaybackStateCompat.Builder stateBuilder;
 
     @Nullable
     @BindView(R.id.button_next)
@@ -78,7 +85,8 @@ public class RecipeStepDetailsFragment extends Fragment {
     @BindView(R.id.step_details_page)
     ConstraintLayout constraintLayout;
 
-    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
+    private final GestureDetector.SimpleOnGestureListener gestureListener =
+            new GestureDetector.SimpleOnGestureListener() {
 
         private static final int SWIPE = 50;
         private static final int VELOCITY = 100;
@@ -112,6 +120,8 @@ public class RecipeStepDetailsFragment extends Fragment {
             Timber.e("The activity is null.");
             return;
         }
+        initializePlayer();
+
         detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
 
         detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
@@ -124,8 +134,10 @@ public class RecipeStepDetailsFragment extends Fragment {
                     return;
                 }
                 int stepIndex = arguments.getInt(RecipeDetailFragment.ARG_STEP_INDEX, 0);
-                Timber.d("step index: %d, model step: %s", stepIndex, detailsViewModel.getStep().getValue());
-                if (detailsViewModel.getStep().getValue() != null && detailsViewModel.getStepIndex(detailsViewModel.getStep().getValue()) != stepIndex) {
+                Step step = detailsViewModel.getStep().getValue();
+                Timber.d("step index: %d, model step: %s", stepIndex, step);
+                int currentStepIndex = detailsViewModel.getStepIndex(step);
+                if (step != null && currentStepIndex != stepIndex) {
                     detailsViewModel.setStepIndex(stepIndex);
                 }
             }
@@ -136,14 +148,22 @@ public class RecipeStepDetailsFragment extends Fragment {
             public void onChanged(Step step) {
                 detailsViewModel.getStep().removeObserver(this);
                 Timber.d("step changed - initializePlayer: %s", step);
-                initializePlayer(step.getVideoURL());
+                String videoURL = step.getVideoURL();
+                if (TextUtils.isEmpty(videoURL)) {
+                    hidePlayer();
+                    return;
+                }
+                MediaSource mediaSource = buildMediaSource(getContext(), videoURL);
+                mediaSession.setActive(true);
+                exoPlayer.prepare(mediaSource);
             }
         });
 
-        final GestureDetectorCompat gestureDetector = new GestureDetectorCompat(getContext(), gestureListener);
+        final GestureDetectorCompat gestureDetector =
+                new GestureDetectorCompat(getContext(), gestureListener);
         onTouchListener = new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View view, MotionEvent event) {
                 gestureDetector.onTouchEvent(event);
                 return activity.onTouchEvent(event);
             }
@@ -159,23 +179,32 @@ public class RecipeStepDetailsFragment extends Fragment {
         ButterKnife.bind(this, rootView);
         viewBinding.setLifecycleOwner(this);
         viewBinding.setViewModel(detailsViewModel);
+
+        playerView.setPlayer(exoPlayer);
+
         if (nextButton != null && prevButton != null) {
             nextButton.setOnClickListener(v -> onNextStepClick());
             prevButton.setOnClickListener(v -> onPreviousStepClick());
         }
+
         if (isLandscapeOrientation()) {
             playerView.setOnTouchListener(onTouchListener);
         }
+
         return rootView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        detailsViewModel.getStep().observe(this, step -> {
-//            Timber.d("step changed: %s", step);
-//            initializePlayer(step.getVideoURL());
-//        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mediaSession != null) {
+            mediaSession.setActive(false);
+        }
     }
 
     private void onNextStepClick() {
@@ -194,39 +223,53 @@ public class RecipeStepDetailsFragment extends Fragment {
         }
     }
 
-    private void initializePlayer(String uri) {
-        if (TextUtils.isEmpty(uri)) {
-            hidePlayer();
-            return;
-        }
-        Timber.d("init player: %s", uri);
+    private void initializePlayer() {
+        Timber.d("init player");
         Context context = getContext();
         PlayerProvider activity = (PlayerProvider) getActivity();
         if (activity == null || context == null) {
             return;
         }
-        SimpleExoPlayer exoPlayer = activity.getPlayer();
+        exoPlayer = activity.getPlayer();
+        setupMediaSession();
+        playerEventListener = new PlayerEventListener();
+        exoPlayer.addListener(playerEventListener);
+        exoPlayer.setPlayWhenReady(true);
+    }
 
-        playerView.setPlayer(exoPlayer);
-
+    @Nullable
+    private MediaSource buildMediaSource(Context context, @Nullable String uri) {
+        if (TextUtils.isEmpty(uri)) {
+            return null;
+        }
         String userAgent = Util.getUserAgent(context, "ExoPlayer");
         DefaultDataSourceFactory dataSourceFactory =
                 new DefaultDataSourceFactory(context, userAgent);
 
         Uri videoUri = Uri.parse(uri);
-        MediaSource mediaSource =
-                new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(videoUri);
+        return new ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(videoUri);
+    }
 
-        playerEventListener = new PlayerEventListener();
-        exoPlayer.addListener(playerEventListener);
-        playerView.setPlaybackPreparer(new PlaybackPreparer() {
-            @Override
-            public void preparePlayback() {
-                Timber.d("preparePlayback");
-            }
-        });
-        exoPlayer.setPlayWhenReady(true);
-        exoPlayer.prepare(mediaSource);
+    private void setupMediaSession() {
+        Context context = getContext();
+        if (context == null) {
+            Timber.e("The context is null. Unable to create a media session.");
+            return;
+        }
+        mediaSession = new MediaSessionCompat(context, TAG);
+        mediaSession.setFlags(
+                MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mediaSession.setMediaButtonReceiver(null);
+
+        stateBuilder = new PlaybackStateCompat.Builder()
+                .setActions(
+                        PlaybackStateCompat.ACTION_PLAY |
+                        PlaybackStateCompat.ACTION_PAUSE |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE);
+        mediaSession.setPlaybackState(stateBuilder.build());
+        mediaSession.setCallback(new PlayerSessionCallback());
     }
 
     private void hidePlayer() {
@@ -266,7 +309,14 @@ public class RecipeStepDetailsFragment extends Fragment {
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
+            if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
+                stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
+                                       exoPlayer.getCurrentPosition(), 1f);
+            } else if((playbackState == ExoPlayer.STATE_READY)){
+                stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
+                                       exoPlayer.getCurrentPosition(), 1f);
+            }
+            mediaSession.setPlaybackState(stateBuilder.build());
         }
 
         @Override
@@ -313,5 +363,22 @@ public class RecipeStepDetailsFragment extends Fragment {
 
     public interface PlayerProvider {
         SimpleExoPlayer getPlayer();
+    }
+
+    private class PlayerSessionCallback extends MediaSessionCompat.Callback {
+        @Override
+        public void onPlay() {
+            exoPlayer.setPlayWhenReady(true);
+        }
+
+        @Override
+        public void onPause() {
+            exoPlayer.setPlayWhenReady(false);
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            exoPlayer.seekTo(0);
+        }
     }
 }
