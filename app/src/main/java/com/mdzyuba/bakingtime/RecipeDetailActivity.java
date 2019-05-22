@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
@@ -47,10 +48,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @BindView(R.id.step_details_container)
     FrameLayout dualPaneFrame;
 
-    public static void startActivityWithStep(Context context, int recipeId, int stepIndex) {
+    public static void startActivity(Context context, int recipeId, int stepIndex) {
         Intent intent = new Intent(context, RecipeDetailActivity.class);
-        intent.putExtra(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
-        intent.putExtra(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipeId);
+        intent.putExtra(IntentArgs.ARG_STEP_INDEX, stepIndex);
         context.startActivity(intent);
     }
 
@@ -138,10 +139,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
 
     private void showRecipeDetailsFragment() {
         Bundle arguments = new Bundle();
-        int recipeId = getIntent().getIntExtra(RecipeDetailFragment.ARG_RECIPE_ID, 0);
-        int stepIndex = getIntent().getIntExtra(RecipeDetailFragment.ARG_STEP_INDEX, 0);
-        arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
-        arguments.putInt(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        int recipeId = getIntent().getIntExtra(IntentArgs.ARG_RECIPE_ID, 0);
+        int stepIndex = getIntent().getIntExtra(IntentArgs.ARG_STEP_INDEX, 0);
+        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
+        arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
         Timber.d("show RecipeDetailFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
         RecipeDetailFragment fragment = new RecipeDetailFragment();
         fragment.setArguments(arguments);
@@ -154,8 +155,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         int recipeId = step.getRecipeId();
         int stepIndex = detailsViewModel.getStepIndex(step);
         Timber.d("show RecipeStepDetailsFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
-        arguments.putInt(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
-        arguments.putInt(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
+        arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
 
         RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
         recipeStepDetailsFragment.setArguments(arguments);

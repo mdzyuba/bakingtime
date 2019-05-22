@@ -4,12 +4,15 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.mdzyuba.bakingtime.IngredientsListActivity;
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeDetailActivity;
 import com.mdzyuba.bakingtime.RecipeListActivity;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -29,15 +32,12 @@ import timber.log.Timber;
  * on handsets.
  */
 public class RecipeDetailFragment extends Fragment {
-    /**
-     * The fragment argument representing the item ID that this fragment
-     * represents.
-     */
-    public static final String ARG_RECIPE_ID = "recipeId";
-    public static final String ARG_STEP_INDEX = "stepIndex";
 
     @BindView(R.id.rv_details)
     RecyclerView recyclerView;
+
+    @BindView(R.id.tv_ingredients_label)
+    TextView ingredients;
 
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
@@ -64,8 +64,8 @@ public class RecipeDetailFragment extends Fragment {
 
         if (savedInstanceState == null) {
             Bundle arguments = getArguments();
-            if (arguments != null && arguments.containsKey(ARG_RECIPE_ID)) {
-                int recipeId = arguments.getInt(ARG_RECIPE_ID);
+            if (arguments != null && arguments.containsKey(IntentArgs.ARG_RECIPE_ID)) {
+                int recipeId = arguments.getInt(IntentArgs.ARG_RECIPE_ID);
                 if (detailsViewModel.getRecipe().getValue() == null ||
                     recipeId != detailsViewModel.getRecipe().getValue().getId()) {
                     detailsViewModel.loadRecipe(recipeId);
@@ -85,7 +85,7 @@ public class RecipeDetailFragment extends Fragment {
                     Timber.e("The fragment arguments are null. Unable to init the Recipe step.");
                     return;
                 }
-                int stepIndex = arguments.getInt(RecipeDetailFragment.ARG_STEP_INDEX, 0);
+                int stepIndex = arguments.getInt(IntentArgs.ARG_STEP_INDEX, 0);
                 Timber.d("Setting a step index %d", stepIndex);
                 detailsViewModel.setStepIndex(stepIndex);
             }
@@ -120,6 +120,16 @@ public class RecipeDetailFragment extends Fragment {
         };
 
         detailsViewModel.getRecipe().observe(this, recipeObserver);
+
+        ingredients.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Recipe recipe = detailsViewModel.getRecipe().getValue();
+                if (recipe != null) {
+                    IngredientsListActivity.startActivity(getContext(), recipe.getId());
+                }
+            }
+        });
 
         return rootView;
     }

@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
-import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
@@ -46,7 +46,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
                     Timber.e("No arguments provided. Unable to init the Recipe step");
                     return;
                 }
-                int stepIndex = arguments.getInt(RecipeDetailFragment.ARG_STEP_INDEX, 0);
+                int stepIndex = arguments.getInt(IntentArgs.ARG_STEP_INDEX, 0);
                 detailsViewModel.setStepIndex(stepIndex);
             }
         });
@@ -63,8 +63,8 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         if (savedInstanceState == null) {
             Bundle arguments = getIntent().getExtras();
             if (arguments != null) {
-                if (arguments.containsKey(RecipeDetailFragment.ARG_RECIPE_ID)) {
-                    int recipeId = arguments.getInt(RecipeDetailFragment.ARG_RECIPE_ID);
+                if (arguments.containsKey(IntentArgs.ARG_RECIPE_ID)) {
+                    int recipeId = arguments.getInt(IntentArgs.ARG_RECIPE_ID);
                     detailsViewModel.loadRecipe(recipeId);
                 }
             }
@@ -84,8 +84,8 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
 
     public static void startActivityWithStep(Context context, int recipeId, int stepIndex) {
         Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
-        intent.putExtra(RecipeDetailFragment.ARG_RECIPE_ID, recipeId);
-        intent.putExtra(RecipeDetailFragment.ARG_STEP_INDEX, stepIndex);
+        intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipeId);
+        intent.putExtra(IntentArgs.ARG_STEP_INDEX, stepIndex);
         context.startActivity(intent);
     }
 
@@ -119,8 +119,8 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
     @Override
     public void onStepSelected(@NonNull Step step) {
         if (isDualFrameMode()) {
-            RecipeDetailActivity.startActivityWithStep(this, step.getRecipeId(),
-                                                       detailsViewModel.getStepIndex(step));
+            RecipeDetailActivity.startActivity(this, step.getRecipeId(),
+                                               detailsViewModel.getStepIndex(step));
         } else {
             Recipe recipe = detailsViewModel.getRecipe().getValue();
             if (recipe != null) {

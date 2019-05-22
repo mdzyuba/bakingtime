@@ -58,7 +58,7 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
 
     @Override
     public void onRecipeSelected(Recipe recipe) {
-        RecipeDetailActivity.startActivityWithStep(this, recipe.getId(), 0);
+        RecipeDetailActivity.startActivity(this, recipe.getId(), 0);
     }
 
 }

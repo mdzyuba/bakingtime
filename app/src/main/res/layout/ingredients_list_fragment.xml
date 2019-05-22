@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.mdzyuba.bakingtime.view.ingredients.IngredientsListFragment">
+
+    <ListView
+        android:id="@+id/ingredients_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/list_padding"
+        android:paddingEnd="@dimen/list_padding"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:layout_marginStart="@dimen/list_margin_h"
+        android:layout_marginEnd="@dimen/list_margin_h"/>
+
+</LinearLayout>
