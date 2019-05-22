@@ -12,6 +12,8 @@
     <dimen name="list_padding_bottom">16dp</dimen>
     <dimen name="list_margin_h">8dp</dimen>
     <dimen name="unit_margin_h">8dp</dimen>
+    <dimen name="servings_padding_top">12dp</dimen>
+    <dimen name="servings_padding_bottom">16dp</dimen>
     <integer name="recipe_grid_columns">1</integer>
     <bool name="dual_pane_mode">false</bool>
 </resources>

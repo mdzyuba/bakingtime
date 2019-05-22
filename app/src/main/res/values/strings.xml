@@ -11,4 +11,5 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="quantity_number_format">%.0f</string>
+    <string name="servings">Servings: %d</string>
 </resources>

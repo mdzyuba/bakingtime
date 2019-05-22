@@ -36,4 +36,10 @@
         <item name="android:textSize">@dimen/text_size</item>
     </style>
 
+
+    <style name="recipeServings" parent="TextAppearance.AppCompat.Title">
+        <item name="android:lineSpacingExtra">@dimen/text_line_spacing</item>
+        <item name="android:textSize">@dimen/text_size</item>
+    </style>
+
 </resources>

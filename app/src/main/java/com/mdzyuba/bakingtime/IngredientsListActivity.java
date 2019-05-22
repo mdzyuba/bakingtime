@@ -51,7 +51,7 @@ public class IngredientsListActivity extends AppCompatActivity {
             //
             // http://developer.android.com/design/patterns/navigation.html#up-vs-back
             //
-            navigateUpTo(new Intent(this, RecipeListActivity.class));
+            navigateUpTo(new Intent(this, RecipeDetailActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
