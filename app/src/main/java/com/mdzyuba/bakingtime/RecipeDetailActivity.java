@@ -58,7 +58,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recipe_details_frame);
+        setContentView(R.layout.recipe_details_frame_activity);
 
         detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
 

@@ -43,7 +43,7 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_list);
+        setContentView(R.layout.recipe_list_activity);
         ButterKnife.bind(this);
 
         recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
