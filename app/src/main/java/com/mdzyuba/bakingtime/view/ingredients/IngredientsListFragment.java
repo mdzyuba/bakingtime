@@ -36,6 +36,7 @@ public class IngredientsListFragment extends Fragment {
     TextView tvServings;
 
     private IngredientsListAdapter listAdapter;
+
     private final Observer<Recipe> recipeIsReady = new Observer<Recipe>() {
         @Override
         public void onChanged(Recipe recipe) {

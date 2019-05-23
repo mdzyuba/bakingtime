@@ -12,4 +12,6 @@
     <string name="next">Next</string>
     <string name="quantity_number_format">%.0f</string>
     <string name="servings">Servings: %d</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
