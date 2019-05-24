@@ -1,0 +1,33 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#80FFFFFF"
+    android:padding="@dimen/widget_margin">
+
+    <TextView
+        android:id="@+id/tv_recipe_title"
+        style="@style/recipeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/recipeBackground"
+        android:paddingStart="@dimen/list_padding"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingEnd="@dimen/list_padding"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:textColor="@color/recipeColor"
+        tools:text="Baking Ingredients" />
+
+    <ListView
+        android:id="@+id/ingredients_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingStart="@dimen/list_padding"
+        android:paddingEnd="@dimen/list_padding"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:layout_marginStart="@dimen/list_margin_h"
+        android:layout_marginEnd="@dimen/list_margin_h"
+        android:layout_below="@+id/tv_recipe_title"/>
+
+</RelativeLayout>
