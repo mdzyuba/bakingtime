@@ -3,6 +3,7 @@ package com.mdzyuba.widget;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
@@ -63,6 +64,10 @@ public class IngredientsListRemoteViewFactory implements RemoteViewsService.Remo
                 .formatQuantity(context, ingredient.getQuantity()));
         listItem.setTextViewText(R.id.tv_measure,
                                  IngredientsViewUtil.formatMeasure(ingredient.getMeasure()));
+        Intent fillInIntent = new Intent();
+        listItem.setOnClickFillInIntent(R.id.tv_ingredient, fillInIntent);
+        listItem.setOnClickFillInIntent(R.id.tv_quantity, fillInIntent);
+        listItem.setOnClickFillInIntent(R.id.tv_measure, fillInIntent);
         return listItem;
     }
 

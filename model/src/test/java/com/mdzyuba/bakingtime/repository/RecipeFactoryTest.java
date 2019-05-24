@@ -22,16 +22,15 @@ import static org.junit.Assert.assertNotNull;
 @RunWith(RobolectricTestRunner.class)
 public class RecipeFactoryTest {
 
-    public static final String BAKING_JSON = "baking.json";
+    private static final String BAKING_JSON = "baking.json";
 
     @Test
     public void loadRecipes_parsesJson() throws Exception {
         String json = TestDataUtils.getJsonString(BAKING_JSON);
         Context context = ApplicationProvider.getApplicationContext();
 
-        RecipeDatabase database = Room.databaseBuilder(context.getApplicationContext(),
-                                                       RecipeDatabase.class,
-                                                       RecipeDatabase.DATABASE_NAME)
+        RecipeDatabase database = Room.inMemoryDatabaseBuilder(context.getApplicationContext(),
+                                                       RecipeDatabase.class)
                                       .allowMainThreadQueries()
                                       .build();
 
