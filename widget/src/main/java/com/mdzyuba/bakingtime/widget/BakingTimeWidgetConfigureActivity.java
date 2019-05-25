@@ -1,4 +1,4 @@
-package com.mdzyuba.widget;
+package com.mdzyuba.bakingtime.widget;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -12,13 +12,14 @@ import android.widget.EditText;
 /**
  * The configuration screen for the {@link BakingTimeWidgetProvider BakingTimeWidgetProvider} AppWidget.
  */
+// TODO: implement it
 public class BakingTimeWidgetConfigureActivity extends Activity {
 
-    private static final String PREFS_NAME = "com.mdzyuba.widget.BakingTimeWidgetProvider";
+    private static final String PREFS_NAME = "com.mdzyuba.bakingtime.widget.BakingTimeWidgetProvider";
     private static final String PREF_PREFIX_KEY = "appwidget_";
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     EditText mAppWidgetText;
-    View.OnClickListener mOnClickListener = new View.OnClickListener() {
+    final View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             final Context context = BakingTimeWidgetConfigureActivity.this;
 

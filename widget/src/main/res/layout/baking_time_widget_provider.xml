@@ -23,12 +23,29 @@
         android:id="@+id/ingredients_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/list_padding"
-        android:paddingEnd="@dimen/list_padding"
-        android:paddingTop="@dimen/list_padding_top"
-        android:paddingBottom="@dimen/list_padding_bottom"
+        android:layout_below="@+id/tv_recipe_title"
         android:layout_marginStart="@dimen/list_margin_h"
         android:layout_marginEnd="@dimen/list_margin_h"
-        android:layout_below="@+id/tv_recipe_title"/>
+        android:paddingStart="@dimen/list_padding"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingEnd="@dimen/list_padding"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        tools:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/tv_no_recipe_selected"
+        style="@style/recipeTitle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tv_recipe_title"
+        android:paddingStart="@dimen/list_padding"
+        android:paddingTop="@dimen/list_padding_top"
+        android:paddingEnd="@dimen/list_padding"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:gravity="center"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:text="@string/no_recipe_selected"
+        />
 
 </RelativeLayout>

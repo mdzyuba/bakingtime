@@ -1,4 +1,4 @@
-package com.mdzyuba.widget;
+package com.mdzyuba.bakingtime.widget;
 
 import org.junit.Test;
 

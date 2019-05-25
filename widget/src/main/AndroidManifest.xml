@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.mdzyuba.widget">
+    package="com.mdzyuba.bakingtime.widget">
 
     <application
         android:allowBackup="false"
@@ -8,6 +8,7 @@
         <receiver android:name=".BakingTimeWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.mdzyuba.bakingtime.widget.UPDATE_RECIPE"/>
             </intent-filter>
 
             <meta-data
@@ -15,7 +16,7 @@
                 android:resource="@xml/baking_time_widget_provider_info" />
         </receiver>
         <service
-            android:name="com.mdzyuba.widget.IngredientsListService"
+            android:name="com.mdzyuba.bakingtime.widget.IngredientsListService"
             android:permission="android.permission.BIND_REMOTEVIEWS"
             android:exported="false"/>
         <activity android:name=".BakingTimeWidgetConfigureActivity">

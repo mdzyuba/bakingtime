@@ -1,11 +1,14 @@
 package com.mdzyuba.bakingtime;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.mdzyuba.bakingtime.model.Recipe;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 import com.mdzyuba.bakingtime.view.list.RecipeListViewModel;
 import com.mdzyuba.bakingtime.view.list.RecipeRecyclerViewAdapter;
 import com.mdzyuba.bakingtime.view.list.RecipeSelectorListener;
+import com.mdzyuba.bakingtime.widget.BakingTimeWidgetProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,6 +20,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Displays a collection of Recipes.
@@ -24,8 +28,6 @@ import butterknife.ButterKnife;
  * A click on a Recipe will open RecipeDetailActivity.
  */
 public class RecipeListActivity extends AppCompatActivity implements RecipeSelectorListener {
-
-    private RecipeListViewModel recipeListViewModel;
 
     @BindView(R.id.item_list)
     RecyclerView recyclerView;
@@ -46,7 +48,8 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
         setContentView(R.layout.recipe_list_activity);
         ButterKnife.bind(this);
 
-        recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
+        RecipeListViewModel recipeListViewModel =
+                ViewModelProviders.of(this).get(RecipeListViewModel.class);
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
 
         int columns = getResources().getInteger(R.integer.recipe_grid_columns);
@@ -59,6 +62,15 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     @Override
     public void onRecipeSelected(Recipe recipe) {
         RecipeDetailActivity.startActivity(this, recipe.getId(), 0);
+        updateWidget(recipe);
+    }
+
+    private void updateWidget(Recipe recipe) {
+        Timber.d("Updating recipe: %d", recipe.getId());
+        Intent intent = new Intent(this, BakingTimeWidgetProvider.class);
+        intent.setAction(BakingTimeWidgetProvider.UPDATE_RECIPE);
+        intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipe.getId());
+        sendBroadcast(intent);
     }
 
 }

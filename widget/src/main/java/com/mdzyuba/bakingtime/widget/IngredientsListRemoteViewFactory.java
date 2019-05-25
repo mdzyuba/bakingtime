@@ -1,7 +1,5 @@
-package com.mdzyuba.widget;
+package com.mdzyuba.bakingtime.widget;
 
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
@@ -9,21 +7,14 @@ import android.widget.RemoteViewsService;
 
 import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
-import com.mdzyuba.bakingtime.repository.LoadRecipeTask;
 import com.mdzyuba.bakingtime.view.ingredients.IngredientsViewUtil;
 
 import java.util.ArrayList;
-
-import androidx.annotation.NonNull;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
-import timber.log.Timber;
 
 public class IngredientsListRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory {
 
     private final ArrayList<Ingredient> ingredientList;
     private final Context context;
-    private Recipe recipe;
 
     public IngredientsListRemoteViewFactory(Context context) {
         this.context = context;
@@ -32,12 +23,11 @@ public class IngredientsListRemoteViewFactory implements RemoteViewsService.Remo
 
     @Override
     public void onCreate() {
-        // TODO: change it to a right value
-        loadRecipe(1);
     }
 
     @Override
     public void onDataSetChanged() {
+        Recipe recipe = BakingTimeWidgetProvider.recipe;
         if (recipe != null) {
             ingredientList.clear();
             ingredientList.addAll(recipe.getIngredients());
@@ -92,24 +82,4 @@ public class IngredientsListRemoteViewFactory implements RemoteViewsService.Remo
         return true;
     }
 
-    private void loadRecipe(@NonNull Integer recipeId) {
-        Timber.d("Load recipe: %d", recipeId);
-        MutableLiveData<Recipe> recipe = new MutableLiveData<>();
-        recipe.observeForever(new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe recipe) {
-                IngredientsListRemoteViewFactory.this.recipe = recipe;
-                notifyDataChanged();
-            }
-
-            private void notifyDataChanged() {
-                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-                ComponentName componentName = new ComponentName(context, BakingTimeWidgetProvider.class);
-                int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
-                appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.ingredients_list);
-            }
-        });
-        LoadRecipeTask loadRecipeTask = new LoadRecipeTask(context, recipeId, recipe);
-        loadRecipeTask.execute();
-    }
 }

@@ -10,8 +10,8 @@ public class BakingTimeApp extends Application {
 
     @Override
     public void onCreate() {
-        enableStrictMode();
         super.onCreate();
+        enableStrictMode();
 
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
@@ -37,4 +37,5 @@ public class BakingTimeApp extends Application {
                                            .build());
         }
     }
+
 }

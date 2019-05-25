@@ -1,4 +1,4 @@
-package com.mdzyuba.widget;
+package com.mdzyuba.bakingtime.widget;
 
 import android.content.Context;
 
@@ -22,6 +22,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.mdzyuba.widget", appContext.getPackageName());
+        assertEquals("com.mdzyuba.bakingtime.widget", appContext.getPackageName());
     }
 }

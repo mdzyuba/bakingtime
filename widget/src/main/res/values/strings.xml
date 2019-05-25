@@ -3,4 +3,6 @@
     <string name="appwidget_text">BakingTime</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="preference_file_key">widget_prefs</string>
+    <string name="no_recipe_selected">Please select a recipe</string>
 </resources>
