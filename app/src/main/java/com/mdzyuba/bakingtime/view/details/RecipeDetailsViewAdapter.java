@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
     private final Recipe recipe;
     private final RecipeStepSelectorListener itemDetailsSelectorListener;
     private int selectedStepPk;
-    private int previouslySelectedItemIndex = -1;
+    private int previouslySelectedItemIndex = IntentArgs.STEP_NOT_SELECTED;
 
     public RecipeDetailsViewAdapter(Recipe recipe, @Nullable
             RecipeStepSelectorListener itemDetailsSelectorListener) {

@@ -36,6 +36,8 @@ import timber.log.Timber;
 public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener,
                                                                        RecipeStepDetailsFragment.PlayerProvider {
 
+    private static final int SELECT_STEP_REQUEST = 1;
+
     private RecipeDetailsViewModel detailsViewModel;
 
     /**
@@ -98,6 +100,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
                     }
                 });
             }
+        } else {
+            int stepIndex = savedInstanceState.getInt(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
+            if (stepIndex > IntentArgs.STEP_NOT_SELECTED) {
+                detailsViewModel.setStepIndex(stepIndex);
+            }
         }
     }
 
@@ -120,7 +127,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @Override
     public void onStepSelected(@NonNull Step step) {
         Timber.d("Step selected: %s", step);
-        detailsViewModel.setStepIndex(detailsViewModel.getStepIndex(step));
+        int stepIndex = detailsViewModel.getStepIndex(step);
+        detailsViewModel.setStepIndex(stepIndex);
         if (isTwoPane()) {
             // TODO: try not reloading details fragment in the landscape mode. Update UI based on the model.
             Timber.d("showStepDetailsFragment");
@@ -132,15 +140,62 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
                 Timber.e("The recipe should be initialized");
                 return;
             }
-            RecipeStepDetailsActivity.startActivityWithStep(this, recipe.getId(),
-                                                            detailsViewModel.getStepIndex(step));
+            Intent intent = RecipeStepDetailsActivity.getActivityForResultIntent(this,
+                                                                                 recipe.getId(),
+                                                                                 stepIndex);
+            startActivityForResult(intent, SELECT_STEP_REQUEST);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (RESULT_OK == resultCode && SELECT_STEP_REQUEST == requestCode && data != null) {
+            int stepIndex = data.getIntExtra(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
+            if (stepIndex > IntentArgs.STEP_NOT_SELECTED) {
+                detailsViewModel.setStepIndex(stepIndex);
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Recipe recipe = detailsViewModel.getRecipe().getValue();
+        if (recipe == null) {
+            return;
+        }
+        int recipeId = recipe.getId();
+        int stepIndex = detailsViewModel.getStepIndex();
+        Timber.d("saving Instance State recipeId: %d, stepIndex: %d", recipeId, stepIndex);
+        outState.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
+        outState.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VideoPlayerSingleton.getInstance(this).releasePlayer();
+    }
+
+    @Override
+    public SimpleExoPlayer getPlayer() {
+        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
+    }
+
+    /**
+     * Checks if the device screen wide enough to hold two panes for the list and details views.
+     *
+     * @return true if two panes is supported.
+     */
+    private boolean isTwoPane() {
+        return dualPaneFrame != null;
     }
 
     private void showRecipeDetailsFragment() {
         Bundle arguments = new Bundle();
         int recipeId = getIntent().getIntExtra(IntentArgs.ARG_RECIPE_ID, 0);
-        int stepIndex = getIntent().getIntExtra(IntentArgs.ARG_STEP_INDEX, 0);
+        int stepIndex = getIntent().getIntExtra(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
         arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
         arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
         Timber.d("show RecipeDetailFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
@@ -165,25 +220,5 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.step_details_container, recipeStepDetailsFragment)
                                    .commit();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        VideoPlayerSingleton.getInstance(this).releasePlayer();
-    }
-
-    @Override
-    public SimpleExoPlayer getPlayer() {
-        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
-    }
-
-    /**
-     * Checks if the device screen wide enough to hold two panes for the list and details views.
-     *
-     * @return true if two panes is supported.
-     */
-    private boolean isTwoPane() {
-        return dualPaneFrame != null;
     }
 }

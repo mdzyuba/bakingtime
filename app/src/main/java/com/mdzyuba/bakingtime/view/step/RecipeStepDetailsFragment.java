@@ -133,7 +133,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                     Timber.e("The fragment arguments are null.");
                     return;
                 }
-                int stepIndex = arguments.getInt(IntentArgs.ARG_STEP_INDEX, 0);
+                int stepIndex = IntentArgs.getSelectedStep(arguments);
                 Step step = detailsViewModel.getStep().getValue();
                 Timber.d("step index: %d, model step: %s", stepIndex, step);
                 int currentStepIndex = detailsViewModel.getStepIndex(step);

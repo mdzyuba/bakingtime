@@ -1,5 +1,7 @@
 package com.mdzyuba.bakingtime.view.details;
 
+import android.content.Context;
+import android.graphics.PointF;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,11 +17,13 @@ import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,6 +47,31 @@ public class RecipeDetailFragment extends Fragment {
     private RecipeStepSelectorListener itemDetailsSelectorListener;
     private RecipeDetailsViewAdapter viewAdapter;
 
+    private final Observer<Recipe> recipeObserver = new Observer<Recipe>() {
+        @Override
+        public void onChanged(Recipe recipe) {
+            if (viewAdapter == null) {
+                initRecyclerViewAdapter(recipe);
+            }
+            if (IntentArgs.isStepSelected(getArguments())) {
+                int stepIndex = IntentArgs.getSelectedStep(getArguments());
+                Timber.d("Setting a step index %d", stepIndex);
+                detailsViewModel.setStepIndex(stepIndex);
+            }
+        }
+    };
+
+    private final Observer<Step> stepObserver = new Observer<Step>() {
+        @Override
+        public void onChanged(Step step) {
+            Timber.d("step changed - setSelectedStepPk: %s", step);
+            if (viewAdapter != null) {
+                viewAdapter.setSelectedStepPk(step.getPk());
+                scrollToSelectedStep();
+            }
+        }
+    };
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -60,46 +89,24 @@ public class RecipeDetailFragment extends Fragment {
             return;
         }
 
-        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
-
-        if (savedInstanceState == null) {
-            Bundle arguments = getArguments();
-            if (arguments != null && arguments.containsKey(IntentArgs.ARG_RECIPE_ID)) {
-                int recipeId = arguments.getInt(IntentArgs.ARG_RECIPE_ID);
-                if (detailsViewModel.getRecipe().getValue() == null ||
-                    recipeId != detailsViewModel.getRecipe().getValue().getId()) {
-                    detailsViewModel.loadRecipe(recipeId);
-                }
-            }
-        }
-
         if (activity instanceof RecipeStepSelectorListener) {
             itemDetailsSelectorListener = (RecipeStepSelectorListener) activity;
         }
 
-        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe recipe) {
-                Bundle arguments = getArguments();
-                if (arguments == null) {
-                    Timber.e("The fragment arguments are null. Unable to init the Recipe step.");
-                    return;
-                }
-                int stepIndex = arguments.getInt(IntentArgs.ARG_STEP_INDEX, 0);
-                Timber.d("Setting a step index %d", stepIndex);
-                detailsViewModel.setStepIndex(stepIndex);
-            }
-        });
+        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
+        detailsViewModel.getRecipe().observe(this, recipeObserver);
+        detailsViewModel.getStep().observe(this, stepObserver);
 
-        detailsViewModel.getStep().observe(this, new Observer<Step>() {
-            @Override
-            public void onChanged(Step step) {
-                Timber.d("step changed - setSelectedStepPk: %s", step);
-                if (viewAdapter != null) {
-                    viewAdapter.setSelectedStepPk(step.getPk());
-                }
-            }
-        });
+        if (savedInstanceState == null) {
+            loadRecipe();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        detailsViewModel.getRecipe().removeObserver(recipeObserver);
+        detailsViewModel.getStep().removeObserver(stepObserver);
     }
 
     @Override
@@ -108,18 +115,8 @@ public class RecipeDetailFragment extends Fragment {
 
         ButterKnife.bind(this, rootView);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        CustomLayoutManager layoutManager = new CustomLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
-
-        Observer<Recipe> recipeObserver = new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe recipe) {
-                viewAdapter = new RecipeDetailsViewAdapter(recipe, itemDetailsSelectorListener);
-                recyclerView.setAdapter(viewAdapter);
-            }
-        };
-
-        detailsViewModel.getRecipe().observe(this, recipeObserver);
 
         ingredients.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,6 +129,59 @@ public class RecipeDetailFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    /**
+     * This RecyclerView LayoutManager helps with scrolling to a selected step.
+     */
+    static class CustomLayoutManager extends LinearLayoutManager {
+        CustomLayoutManager(Context context) {
+            super(context, RecyclerView.VERTICAL, false);
+        }
+
+        @Override
+        public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state,
+                                           int position) {
+            RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(recyclerView.getContext()) {
+
+                @Override
+                protected int getVerticalSnapPreference() {
+                    return SNAP_TO_START;
+                }
+
+                @Nullable
+                @Override
+                public PointF computeScrollVectorForPosition(int targetPosition) {
+                    return CustomLayoutManager.this.computeScrollVectorForPosition(targetPosition);
+                }
+            };
+            smoothScroller.setTargetPosition(position);
+            startSmoothScroll(smoothScroller);
+        }
+    }
+
+    private void loadRecipe() {
+        Bundle arguments = getArguments();
+        if (arguments != null && arguments.containsKey(IntentArgs.ARG_RECIPE_ID)) {
+            int recipeId = arguments.getInt(IntentArgs.ARG_RECIPE_ID);
+            if (detailsViewModel.getRecipe().getValue() == null ||
+                recipeId != detailsViewModel.getRecipe().getValue().getId()) {
+                detailsViewModel.loadRecipe(recipeId);
+            }
+        }
+    }
+
+    private void scrollToSelectedStep() {
+        final int stepIndex = detailsViewModel.getStepIndex();
+        if (viewAdapter != null && IntentArgs.isStepSelected(stepIndex)) {
+            Timber.d("Scrolling to step index: %d", stepIndex);
+            recyclerView.smoothScrollToPosition(stepIndex);
+        }
+    }
+
+    private void initRecyclerViewAdapter(Recipe recipe) {
+        viewAdapter = new RecipeDetailsViewAdapter(recipe, itemDetailsSelectorListener);
+        recyclerView.setAdapter(viewAdapter);
     }
 
 }

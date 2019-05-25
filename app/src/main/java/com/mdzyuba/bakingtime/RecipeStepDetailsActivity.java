@@ -46,7 +46,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
                     Timber.e("No arguments provided. Unable to init the Recipe step");
                     return;
                 }
-                int stepIndex = arguments.getInt(IntentArgs.ARG_STEP_INDEX, 0);
+                int stepIndex = IntentArgs.getSelectedStep(arguments);
                 detailsViewModel.setStepIndex(stepIndex);
             }
         });
@@ -79,14 +79,12 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
         }
-
     }
 
-    public static void startActivityWithStep(Context context, int recipeId, int stepIndex) {
+    public static Intent getActivityForResultIntent(Context context, int recipeId, int stepIndex) {
         Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
-        intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipeId);
-        intent.putExtra(IntentArgs.ARG_STEP_INDEX, stepIndex);
-        context.startActivity(intent);
+        IntentArgs.setArgs(intent, recipeId, stepIndex);
+        return intent;
     }
 
     @Override
@@ -118,24 +116,31 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
 
     @Override
     public void onStepSelected(@NonNull Step step) {
+        int stepIndex = detailsViewModel.getStepIndex(step);
         if (isDualFrameMode()) {
             RecipeDetailActivity.startActivity(this, step.getRecipeId(),
-                                               detailsViewModel.getStepIndex(step));
+                                               stepIndex);
         } else {
             Recipe recipe = detailsViewModel.getRecipe().getValue();
             if (recipe != null) {
-                RecipeStepDetailsActivity.startActivityWithStep(this, recipe.getId(),
-                                                                detailsViewModel.getStepIndex(step));
+                Intent resultIntent = new Intent();
+                IntentArgs.setArgs(resultIntent, recipe.getId(), stepIndex);
+                setResult(RESULT_OK, resultIntent);
+                Timber.d("Navigating to step: %s", step);
+                detailsViewModel.setStepIndex(stepIndex);
             }
         }
     }
 
     private void showRecipeDetailsFragment() {
+        final String FRAGMENT_TAG = RecipeStepDetailsFragment.class.getSimpleName();
         RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
-        recipeStepDetailsFragment.setArguments(getIntent().getExtras());
+        Bundle extras = getIntent().getExtras();
+        IntentArgs.setSelectedStep(extras, detailsViewModel.getStepIndex());
+        recipeStepDetailsFragment.setArguments(extras);
         recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
         getSupportFragmentManager().beginTransaction()
-                                   .add(R.id.recipe_step_details_frame, recipeStepDetailsFragment)
+                                   .replace(R.id.recipe_step_details_frame, recipeStepDetailsFragment, FRAGMENT_TAG)
                                    .commit();
     }
 

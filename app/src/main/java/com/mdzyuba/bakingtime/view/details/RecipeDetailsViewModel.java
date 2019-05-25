@@ -5,6 +5,7 @@ import android.app.Application;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.repository.LoadRecipeTask;
+import com.mdzyuba.bakingtime.view.IntentArgs;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         recipe = new MutableLiveData<>();
         stepIndexLd = new MutableLiveData<>();
         step = new MutableLiveData<>();
-        stepIndex = 0;
+        stepIndex = IntentArgs.STEP_NOT_SELECTED;
         nextStepAvailable = new ObservableBoolean(false);
         previousStepAvailable = new ObservableBoolean(false);
     }
@@ -40,17 +41,19 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         Timber.d("Load recipe: %d", recipeId);
         LoadRecipeTask loadRecipeTask = new LoadRecipeTask(getApplication(), recipeId, recipe);
         loadRecipeTask.execute();
-        recipe.observeForever(new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe aRecipe) {
-                recipe.removeObserver(this);
-                Timber.d("A recipe is loaded: %s", aRecipe);
-                List<Step> steps = aRecipe.getSteps();
-                if (steps != null && !steps.isEmpty()) {
-                    step.postValue(steps.get(stepIndex));
+        if (IntentArgs.isStepSelected(stepIndex)) {
+            recipe.observeForever(new Observer<Recipe>() {
+                @Override
+                public void onChanged(Recipe aRecipe) {
+                    recipe.removeObserver(this);
+                    Timber.d("A recipe is loaded: %s", aRecipe);
+                    List<Step> steps = aRecipe.getSteps();
+                    if (steps != null && !steps.isEmpty()) {
+                        step.postValue(steps.get(stepIndex));
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     public MutableLiveData<Recipe> getRecipe() {
@@ -81,6 +84,10 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         return recipe.getSteps().size();
     }
 
+    public int getStepIndex() {
+        return stepIndex;
+    }
+
     public int getStepIndex(Step step) {
         // TODO: simplify to use a step id
         Recipe recipe = this.recipe.getValue();
@@ -93,11 +100,15 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         }
         for (int i = 0; i < steps.size(); i++) {
             Step st = steps.get(i);
-            if (st.getPk() == step.getPk()) {
+            if (st.getPk().equals(step.getPk())) {
                 return i;
             }
         }
         return 0;
+    }
+
+    public MutableLiveData<Integer> getStepIndexLd() {
+        return stepIndexLd;
     }
 
     public LiveData<Step> getStep() {
