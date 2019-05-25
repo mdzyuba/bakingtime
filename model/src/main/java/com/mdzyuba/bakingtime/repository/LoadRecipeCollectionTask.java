@@ -30,7 +30,11 @@ public class LoadRecipeCollectionTask extends AsyncTask<Void, Void, Collection<R
             }
             RecipeFactory factory = new RecipeFactory(context);
             if (contextWeakReference.get() != null) {
-                return factory.loadRecipes(contextWeakReference.get());
+                Collection<Recipe> recipes = factory.loadAllRecipesFromDb();
+                if (recipes == null || recipes.isEmpty()) {
+                    recipes = factory.loadRecipes(contextWeakReference.get());
+                }
+                return recipes;
             }
         } catch (IOException e) {
             Timber.e(e);

@@ -40,19 +40,24 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+
     implementation "android.arch.persistence.room:runtime:$room_version"
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
+
     implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     implementation 'com.squareup.okhttp3:okhttp:3.14.1'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.14.1'
-    implementation 'com.jakewharton.timber:timber:4.7.1'
+
     testImplementation 'junit:junit:4.12'
     testImplementation 'androidx.test:core:1.0.0'
     testImplementation 'org.mockito:mockito-core:1.10.19'
     testImplementation 'org.hamcrest:hamcrest:2.1'
     testImplementation 'org.robolectric:robolectric:4.2'
     testImplementation "android.arch.persistence.room:testing:$room_version"
+
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation project(path: ':utils')
 }

@@ -4,7 +4,6 @@ import com.mdzyuba.bakingtime.model.Recipe;
 
 import java.util.List;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -16,7 +15,7 @@ import androidx.room.Update;
 public interface RecipeDao {
 
     @Query("SELECT * from recipe ORDER BY id")
-    LiveData<List<Recipe>> loadRecipes();
+    List<Recipe> loadRecipes();
 
     @Query("SELECT * from recipe WHERE id = :id")
     Recipe loadRecipe(int id);

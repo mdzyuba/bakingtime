@@ -9,6 +9,7 @@ import com.mdzyuba.bakingtime.db.IngredientDao;
 import com.mdzyuba.bakingtime.db.RecipeDao;
 import com.mdzyuba.bakingtime.db.RecipeDatabase;
 import com.mdzyuba.bakingtime.db.StepDao;
+import com.mdzyuba.bakingtime.http.HttpClientProvider;
 import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
@@ -38,7 +39,7 @@ public class RecipeFactory {
     private static final String RECIPES_URL = BuildConfig.BAKER_URL;
     private static final String DELIMITER = "\\A";
 
-    private RecipeDatabase database;
+    private final RecipeDatabase database;
 
     public RecipeFactory(Context context) {
         database = RecipeDatabase.getInstance(context);
@@ -76,6 +77,11 @@ public class RecipeFactory {
                 ingredientDao.insert(ingredient);
             }
         }
+    }
+
+    public List<Recipe> loadAllRecipesFromDb() {
+        RecipeDao recipeDao = database.recipeDao();
+        return recipeDao.loadRecipes();
     }
 
     public Recipe loadRecipe(Context context, @NonNull Integer recipeId) {
