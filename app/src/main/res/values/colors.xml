@@ -6,7 +6,8 @@
     <color name="stepBackground">#E5E6F3</color>
     <color name="stepPressedBackground">#C9CDF7</color>
     <color name="stepSelectedBackground">#FBC02D</color>
-    <color name="ingredientsTitleBackground">#E5F3E6</color>
+    <color name="ingredientsTitleBackground">#E0F2F1</color>
+    <color name="ingredientsTitlePressedBackground">#B2DFDB</color>
     <color name="buttonIconEnabled">#00574B</color>
     <color name="buttonIconDisabled">#4D80CBC4</color>
     <color name="buttonIconFocused">#00574B</color>
