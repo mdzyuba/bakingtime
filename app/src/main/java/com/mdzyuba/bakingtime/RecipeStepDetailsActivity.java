@@ -24,12 +24,22 @@ import timber.log.Timber;
 
 /**
  * Displays a Recipe Step information.
+ *
+ * The activity provides options to navigate between Recipe steps. It is passing selected step
+ * back to the RecipeDetailActivity by setting activity result, so the RecipeDetailActivity
+ * could highlight the currently selected step. The activity result is preserved on back button
+ * click as well as home button click.
  */
 public class RecipeStepDetailsActivity extends AppCompatActivity implements
                                                                  RecipeStepDetailsFragment.PlayerProvider,
                                                                  RecipeStepSelectorListener {
-
     private RecipeDetailsViewModel detailsViewModel;
+
+    public static Intent getActivityForResultIntent(Context context, int recipeId, int stepIndex) {
+        Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
+        IntentArgs.setArgs(intent, recipeId, stepIndex);
+        return intent;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +51,10 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
             @Override
             public void onChanged(Recipe recipe) {
+                if (detailsViewModel.getStepIndex() > IntentArgs.STEP_NOT_SELECTED) {
+                    Timber.d("The model has step index: %d", detailsViewModel.getStepIndex());
+                    return;
+                }
                 Bundle arguments = getIntent().getExtras();
                 if (arguments == null) {
                     Timber.e("No arguments provided. Unable to init the Recipe step");
@@ -81,26 +95,23 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         }
     }
 
-    public static Intent getActivityForResultIntent(Context context, int recipeId, int stepIndex) {
-        Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
-        IntentArgs.setArgs(intent, recipeId, stepIndex);
-        return intent;
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
-            navigateUpTo(new Intent(this, RecipeDetailActivity.class));
+            // Return a selected step to the parent activity.
+            saveSelectedStepToActivityResult(detailsViewModel.getStepIndex());
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Return a selected step to the parent activity.
+        saveSelectedStepToActivityResult(detailsViewModel.getStepIndex());
+        super.onBackPressed();
     }
 
     @Override
@@ -121,14 +132,21 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
             RecipeDetailActivity.startActivity(this, step.getRecipeId(),
                                                stepIndex);
         } else {
+            saveSelectedStepToActivityResult(stepIndex);
             Recipe recipe = detailsViewModel.getRecipe().getValue();
             if (recipe != null) {
-                Intent resultIntent = new Intent();
-                IntentArgs.setArgs(resultIntent, recipe.getId(), stepIndex);
-                setResult(RESULT_OK, resultIntent);
                 Timber.d("Navigating to step: %s", step);
                 detailsViewModel.setStepIndex(stepIndex);
             }
+        }
+    }
+
+    private void saveSelectedStepToActivityResult(int stepIndex) {
+        Recipe recipe = detailsViewModel.getRecipe().getValue();
+        if (recipe != null) {
+            Intent resultIntent = new Intent();
+            IntentArgs.setArgs(resultIntent, recipe.getId(), stepIndex);
+            setResult(RESULT_OK, resultIntent);
         }
     }
 
@@ -140,7 +158,9 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
         recipeStepDetailsFragment.setArguments(extras);
         recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
         getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.recipe_step_details_frame, recipeStepDetailsFragment, FRAGMENT_TAG)
+                                   .replace(R.id.recipe_step_details_frame,
+                                            recipeStepDetailsFragment,
+                                            FRAGMENT_TAG)
                                    .commit();
     }
 
