@@ -68,7 +68,7 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     private void updateWidget(Recipe recipe) {
         Timber.d("Updating recipe: %d", recipe.getId());
         Intent intent = new Intent(this, BakingTimeWidgetProvider.class);
-        intent.setAction(BakingTimeWidgetProvider.UPDATE_RECIPE);
+        intent.setAction(BakingTimeWidgetProvider.ACTION_UPDATE_RECIPE);
         intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipe.getId());
         sendBroadcast(intent);
     }

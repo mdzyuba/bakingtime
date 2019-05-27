@@ -8,7 +8,7 @@
         <receiver android:name=".BakingTimeWidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.mdzyuba.bakingtime.widget.UPDATE_RECIPE"/>
+                <action android:name="com.mdzyuba.bakingtime.widget.ACTION_UPDATE_RECIPE"/>
             </intent-filter>
 
             <meta-data

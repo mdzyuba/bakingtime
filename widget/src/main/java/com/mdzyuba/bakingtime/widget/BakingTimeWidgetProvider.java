@@ -22,11 +22,11 @@ import timber.log.Timber;
  *
  * The widget displays the recipe name and ingredients.
  *
- * The recipeId is set by the UPDATE_RECIPE broadcast and IntentArgs.ARG_RECIPE_ID parameter.
+ * The recipeId is set by the ACTION_UPDATE_RECIPE broadcast and IntentArgs.ARG_RECIPE_ID parameter.
  */
 public class BakingTimeWidgetProvider extends AppWidgetProvider {
 
-    public static final String UPDATE_RECIPE = "com.mdzyuba.bakingtime.widget.UPDATE_RECIPE";
+    public static final String ACTION_UPDATE_RECIPE = "com.mdzyuba.bakingtime.widget.ACTION_UPDATE_RECIPE";
     private static final int NO_RECIPE_SELECTED = -1;
 
     // TODO: find a better way to pass the recipeId to IngredientsListRemoteViewFactory.
@@ -86,7 +86,7 @@ public class BakingTimeWidgetProvider extends AppWidgetProvider {
             // Launch the app if the broadcast is initiated by the widget ListView items.
             Intent appLaunchIntent = getAppLaunchIntent(context);
             context.startActivity(appLaunchIntent);
-        } else if (UPDATE_RECIPE.equals(action)){
+        } else if (ACTION_UPDATE_RECIPE.equals(action)){
             // This broadcast is sent once a user selects a recipe.
             recipeId = intent.getIntExtra(IntentArgs.ARG_RECIPE_ID, NO_RECIPE_SELECTED);
             if (recipeId != NO_RECIPE_SELECTED) {

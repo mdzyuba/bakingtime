@@ -51,10 +51,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     FrameLayout dualPaneFrame;
 
     public static void startActivity(Context context, int recipeId, int stepIndex) {
+        Intent intent = getIntent(context, recipeId, stepIndex);
+        context.startActivity(intent);
+    }
+
+    public static Intent getIntent(Context context, int recipeId, int stepIndex) {
         Intent intent = new Intent(context, RecipeDetailActivity.class);
         intent.putExtra(IntentArgs.ARG_RECIPE_ID, recipeId);
         intent.putExtra(IntentArgs.ARG_STEP_INDEX, stepIndex);
-        context.startActivity(intent);
+        return intent;
     }
 
     @Override
