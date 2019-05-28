@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.mdzyuba.bakingtime.IngredientsListActivity;
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeDetailActivity;
 import com.mdzyuba.bakingtime.RecipeListActivity;
@@ -46,6 +45,7 @@ public class RecipeDetailFragment extends Fragment {
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
     private RecipeDetailsViewAdapter viewAdapter;
+    private IngredientsSelectorListener ingredientsSelectorListener;
 
     private final Observer<Recipe> recipeObserver = new Observer<Recipe>() {
         @Override
@@ -68,6 +68,17 @@ public class RecipeDetailFragment extends Fragment {
             if (viewAdapter != null) {
                 viewAdapter.setSelectedStepPk(step.getPk());
                 scrollToSelectedStep();
+            }
+        }
+    };
+
+    private final Observer<Integer> stepIndexObserver = new Observer<Integer>() {
+        @Override
+        public void onChanged(Integer stepIndex) {
+            if (stepIndex == IntentArgs.STEP_NOT_SELECTED) {
+                if (viewAdapter != null) {
+                    viewAdapter.clearSelectedStep();
+                }
             }
         }
     };
@@ -96,6 +107,7 @@ public class RecipeDetailFragment extends Fragment {
         detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
         detailsViewModel.getRecipe().observe(this, recipeObserver);
         detailsViewModel.getStep().observe(this, stepObserver);
+        detailsViewModel.getStepIndexLd().observe(this, stepIndexObserver);
 
         if (savedInstanceState == null) {
             loadRecipe();
@@ -107,6 +119,7 @@ public class RecipeDetailFragment extends Fragment {
         super.onDestroy();
         detailsViewModel.getRecipe().removeObserver(recipeObserver);
         detailsViewModel.getStep().removeObserver(stepObserver);
+        detailsViewModel.getStepIndexLd().removeObserver(stepIndexObserver);
     }
 
     @Override
@@ -123,12 +136,19 @@ public class RecipeDetailFragment extends Fragment {
             public void onClick(View v) {
                 Recipe recipe = detailsViewModel.getRecipe().getValue();
                 if (recipe != null) {
-                    IngredientsListActivity.startActivity(getContext(), recipe.getId());
+                    if (ingredientsSelectorListener != null) {
+                        ingredientsSelectorListener.onIngredientsSelected(recipe.getId());
+                    }
                 }
             }
         });
 
         return rootView;
+    }
+
+    public void setIngredientsSelectorListener(
+            IngredientsSelectorListener ingredientsSelectorListener) {
+        this.ingredientsSelectorListener = ingredientsSelectorListener;
     }
 
     /**

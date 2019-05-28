@@ -10,9 +10,11 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.mdzyuba.bakingtime.view.details.IngredientsSelectorListener;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
+import com.mdzyuba.bakingtime.view.ingredients.IngredientsListFragment;
 import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
 import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
@@ -50,6 +52,27 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @BindView(R.id.step_details_container)
     FrameLayout dualPaneFrame;
 
+    private final Observer<Recipe> recipeObserver = new Observer<Recipe>() {
+        @Override
+        public void onChanged(Recipe recipe) {
+            setTitle(recipe.getName());
+            // Display the first step by default
+            if (isTwoPane() &&
+                detailsViewModel.getStepIndex() == IntentArgs.STEP_NOT_SELECTED &&
+                detailsViewModel.getTotalSteps() > 0) {
+                detailsViewModel.setStepIndex(0);
+            }
+        }
+    };
+
+    private final Observer<Step> stepObserver = new Observer<Step>() {
+        @Override
+        public void onChanged(Step step) {
+            detailsViewModel.getStep().removeObserver(this);
+            showStepDetailsFragment(step);
+        }
+    };
+
     public static void startActivity(Context context, int recipeId, int stepIndex) {
         Intent intent = getIntent(context, recipeId, stepIndex);
         context.startActivity(intent);
@@ -66,17 +89,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_details_frame_activity);
-
-        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
-
         ButterKnife.bind(this);
-
-        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe recipe) {
-                setTitle(recipe.getName());
-            }
-        });
+        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+        detailsViewModel.getRecipe().observe(this, recipeObserver);
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -95,21 +110,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         //
         if (savedInstanceState == null) {
             showRecipeDetailsFragment();
-
             if (isTwoPane()) {
-                detailsViewModel.getStep().observe(this, new Observer<Step>() {
-                    @Override
-                    public void onChanged(Step step) {
-                        detailsViewModel.getStep().removeObserver(this);
-                        showStepDetailsFragment(step);
-                    }
-                });
+                detailsViewModel.getStep().observe(this, stepObserver);
             }
         } else {
-            int stepIndex = savedInstanceState.getInt(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
-            if (stepIndex > IntentArgs.STEP_NOT_SELECTED) {
-                detailsViewModel.setStepIndex(stepIndex);
-            }
+            updateSelectedStep(savedInstanceState);
         }
     }
 
@@ -156,10 +161,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (RESULT_OK == resultCode && SELECT_STEP_REQUEST == requestCode && data != null) {
-            int stepIndex = data.getIntExtra(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
-            if (stepIndex > IntentArgs.STEP_NOT_SELECTED) {
-                detailsViewModel.setStepIndex(stepIndex);
-            }
+            updateSelectedStep(data.getExtras());
         }
     }
 
@@ -181,6 +183,10 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     protected void onDestroy() {
         super.onDestroy();
         VideoPlayerSingleton.getInstance(this).releasePlayer();
+        detailsViewModel.getRecipe().removeObserver(recipeObserver);
+        if (isTwoPane()) {
+            detailsViewModel.getStep().removeObserver(stepObserver);
+        }
     }
 
     @Override
@@ -206,8 +212,35 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         Timber.d("show RecipeDetailFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
         RecipeDetailFragment fragment = new RecipeDetailFragment();
         fragment.setArguments(arguments);
+
+        fragment.setIngredientsSelectorListener(new IngredientsSelectorListener() {
+            @Override
+            public void onIngredientsSelected(int recipeId) {
+                if (isTwoPane()) {
+                    showIngredientsListFragment(recipeId);
+                    clearSelectedStep();
+                } else {
+                    IngredientsListActivity.startActivity(RecipeDetailActivity.this, recipeId);
+                }
+            }
+        });
+
         getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)
                                    .commit();
+    }
+
+    private void clearSelectedStep() {
+        detailsViewModel.setStepIndex(IntentArgs.STEP_NOT_SELECTED);
+    }
+
+    private void showIngredientsListFragment(int recipeId) {
+        IngredientsListFragment fragment = IngredientsListFragment.newInstance();
+        Bundle arguments = new Bundle();
+        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
+        fragment.setArguments(arguments);
+        getSupportFragmentManager().beginTransaction()
+                                   .replace(R.id.step_details_container, fragment)
+                                   .commitNow();
     }
 
     private void showStepDetailsFragment(Step step) {
@@ -225,5 +258,12 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         getSupportFragmentManager().beginTransaction()
                                    .replace(R.id.step_details_container, recipeStepDetailsFragment)
                                    .commit();
+    }
+
+    private void updateSelectedStep(Bundle savedInstanceState) {
+        int stepIndex = IntentArgs.getSelectedStep(savedInstanceState);
+        if (IntentArgs.isStepSelected(stepIndex)) {
+            detailsViewModel.setStepIndex(stepIndex);
+        }
     }
 }

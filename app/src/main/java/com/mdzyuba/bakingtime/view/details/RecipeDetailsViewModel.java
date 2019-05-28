@@ -64,6 +64,9 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         Timber.d("Setting a step index: %d", stepIndex);
         this.stepIndex = stepIndex;
         stepIndexLd.postValue(stepIndex);
+        if (IntentArgs.STEP_NOT_SELECTED == stepIndex) {
+            return;
+        }
         Recipe recipe = this.recipe.getValue();
         if (recipe == null || recipe.getSteps() == null) {
             return;

@@ -68,7 +68,7 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         return steps != null ? steps.size() : 0;
     }
 
-    // TODO: change to the step index. Also add a scroll to the selected item.
+    // TODO: change to the step index.
     public void setSelectedStepPk(int selectedStepPk) {
         this.selectedStepPk = selectedStepPk;
         for (int i = 0; i < recipe.getSteps().size(); i++) {
@@ -81,6 +81,14 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
                 notifyItemChanged(i);
                 break;
             }
+        }
+    }
+
+    public void clearSelectedStep() {
+        this.selectedStepPk = IntentArgs.STEP_NOT_SELECTED;
+        if (previouslySelectedItemIndex != IntentArgs.STEP_NOT_SELECTED) {
+            notifyItemChanged(previouslySelectedItemIndex);
+            previouslySelectedItemIndex = IntentArgs.STEP_NOT_SELECTED;
         }
     }
 

@@ -18,15 +18,7 @@ public class IngredientsListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ingredients_list_activity);
         if (savedInstanceState == null) {
-
-            IngredientsListFragment fragment = IngredientsListFragment.newInstance();
-            Bundle arguments = getIntent().getExtras();
-            if (arguments != null) {
-                fragment.setArguments(arguments);
-            }
-            getSupportFragmentManager().beginTransaction()
-                                       .replace(R.id.container, fragment)
-                                       .commitNow();
+            showIngredientsListFragment();
         }
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -55,6 +47,17 @@ public class IngredientsListActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showIngredientsListFragment() {
+        IngredientsListFragment fragment = IngredientsListFragment.newInstance();
+        Bundle arguments = getIntent().getExtras();
+        if (arguments != null) {
+            fragment.setArguments(arguments);
+        }
+        getSupportFragmentManager().beginTransaction()
+                                   .replace(R.id.container, fragment)
+                                   .commitNow();
     }
 
 }
