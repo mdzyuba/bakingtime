@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -28,6 +29,12 @@ public class RecipeDetailActivityTest {
     public void recipeIngredientsLabelIsDisplaed() {
         onView(withId(R.id.tv_ingredients_label)).check(matches(isDisplayed()));
         onView(withText("Ingredients")).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void clickOnIngredientsOpensIngredientsList() {
+        onView(withText("Ingredients")).perform(click());
+        onView(withText("salt")).check(matches(isDisplayed()));
     }
 
     @Test
