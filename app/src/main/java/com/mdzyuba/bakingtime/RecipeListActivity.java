@@ -2,6 +2,8 @@ package com.mdzyuba.bakingtime;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.view.IntentArgs;
@@ -33,6 +35,9 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     @BindView(R.id.item_list)
     RecyclerView recyclerView;
 
+    @BindView(R.id.loading_recipes_progress)
+    LinearLayout progressView;
+
     private final Observer<Collection<Recipe>> recipesObserver = new Observer<Collection<Recipe>>() {
         @Override
         public void onChanged(Collection<Recipe> recipes) {
@@ -50,6 +55,8 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
                     new RecipeRecyclerViewAdapter(RecipeListActivity.this,
                                                   new ArrayList<>(recipes));
             recyclerView.setAdapter(adapter);
+            progressView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
         }
     };
     private RecipeListViewModel recipeListViewModel;

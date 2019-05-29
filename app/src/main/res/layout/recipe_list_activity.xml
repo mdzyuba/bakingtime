@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/recipe_list" />
+    <include layout="@layout/recipe_list" android:visibility="gone"/>
+
+    <include layout="@layout/recipe_loading_progress" />
 
 </FrameLayout>
 

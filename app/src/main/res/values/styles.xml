@@ -17,14 +17,11 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="recipeTitle" parent="TextAppearance.AppCompat.Title">
-    </style>
+    <style name="recipeTitle" parent="TextAppearance.AppCompat.Title" />
 
-    <style name="ingredientsTitle" parent="TextAppearance.AppCompat.Title">
-    </style>
+    <style name="ingredientsTitle" parent="TextAppearance.AppCompat.Title" />
 
-    <style name="recipeStepTitle" parent="TextAppearance.AppCompat.Title">
-    </style>
+    <style name="recipeStepTitle" parent="TextAppearance.AppCompat.Title" />
 
     <style name="recipeStep" parent="TextAppearance.AppCompat.Title">
         <item name="android:lineSpacingExtra">@dimen/text_line_spacing</item>
@@ -36,10 +33,11 @@
         <item name="android:textSize">@dimen/text_size</item>
     </style>
 
-
     <style name="recipeServings" parent="TextAppearance.AppCompat.Title">
         <item name="android:lineSpacingExtra">@dimen/text_line_spacing</item>
         <item name="android:textSize">@dimen/text_size</item>
     </style>
+
+    <style name="progressTitle" parent="TextAppearance.AppCompat.Title" />
 
 </resources>

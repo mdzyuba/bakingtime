@@ -15,4 +15,6 @@
     <string name="error_loading_recipes">Unable to load recipes. Please try again later.</string>
     <string name="try_again">Try again</string>
     <string name="step_thumbnail">Step Thumbnail</string>
+    <string name="loading_recipes">Loading recipes …</string>
+    <string name="progress_bar">Progress bar</string>
 </resources>
