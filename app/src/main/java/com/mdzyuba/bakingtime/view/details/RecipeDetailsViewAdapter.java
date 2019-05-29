@@ -1,15 +1,20 @@
 package com.mdzyuba.bakingtime.view.details;
 
 import android.content.Context;
+import android.net.Uri;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
+import com.mdzyuba.bakingtime.images.PicassoProvider;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -18,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 
 public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetailsViewAdapter.StepViewHolder> {
@@ -100,6 +106,9 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         @BindView(R.id.tv_name)
         TextView name;
 
+        @BindView(R.id.thumbnail)
+        ImageView thumbnail;
+
         private final Context context;
 
         StepViewHolder(@NonNull View itemView) {
@@ -119,6 +128,24 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
                 itemView.setSelected(true);
             } else {
                 itemView.setSelected(false);
+            }
+            showThumbnail(step);
+        }
+
+        private void showThumbnail(Step step) {
+            String thumbnailURL = step.getThumbnailURL();
+            if (!TextUtils.isEmpty(thumbnailURL)) {
+                Picasso picasso = PicassoProvider.getPicasso(context);
+                try {
+                    Uri imageUri = Uri.parse(thumbnailURL);
+                    picasso.load(imageUri).placeholder(R.drawable.image_placeholder).into(thumbnail);
+                    thumbnail.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Timber.e(e, "Unable to load the image %s", thumbnailURL);
+                    thumbnail.setVisibility(View.GONE);
+                }
+            } else {
+                thumbnail.setVisibility(View.GONE);
             }
         }
     }

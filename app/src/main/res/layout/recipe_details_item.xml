@@ -8,24 +8,38 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
-    android:layout_marginTop="8dp">
+    android:layout_marginBottom="8dp">
 
     <TextView
         android:id="@+id/tv_name"
         style="@style/recipeStepTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
         android:gravity="center"
         android:text=""
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tv_step_id"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Recipe Step" />
+
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="@dimen/step_thumbnail_width"
+        android:layout_height="@dimen/step_thumbnail_height"
+        android:layout_marginStart="8dp"
+        android:contentDescription="@string/step_thumbnail"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tv_step_id"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.333"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/tv_step_id"
@@ -39,5 +53,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tv_name"
         tools:text="1." />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

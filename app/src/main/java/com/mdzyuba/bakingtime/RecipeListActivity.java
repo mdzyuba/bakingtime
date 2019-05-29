@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.mdzyuba.bakingtime.view.details.ErrorDialog;
 import com.mdzyuba.bakingtime.view.list.RecipeListViewModel;
 import com.mdzyuba.bakingtime.view.list.RecipeRecyclerViewAdapter;
 import com.mdzyuba.bakingtime.view.list.RecipeSelectorListener;
@@ -35,12 +36,23 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     private final Observer<Collection<Recipe>> recipesObserver = new Observer<Collection<Recipe>>() {
         @Override
         public void onChanged(Collection<Recipe> recipes) {
+            if (recipes == null) {
+                Timber.e("Unable to load recipes");
+                ErrorDialog.showErrorDialog(RecipeListActivity.this, new ErrorDialog.Retry() {
+                    @Override
+                    public void retry() {
+                        recipeListViewModel.loadRecipes();
+                    }
+                });
+                return;
+            }
             RecipeRecyclerViewAdapter adapter =
                     new RecipeRecyclerViewAdapter(RecipeListActivity.this,
                                                   new ArrayList<>(recipes));
             recyclerView.setAdapter(adapter);
         }
     };
+    private RecipeListViewModel recipeListViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +60,7 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
         setContentView(R.layout.recipe_list_activity);
         ButterKnife.bind(this);
 
-        RecipeListViewModel recipeListViewModel =
-                ViewModelProviders.of(this).get(RecipeListViewModel.class);
+        recipeListViewModel = ViewModelProviders.of(this).get(RecipeListViewModel.class);
         recipeListViewModel.getRecipes().observe(this, recipesObserver);
 
         int columns = getResources().getInteger(R.integer.recipe_grid_columns);

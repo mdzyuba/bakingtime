@@ -14,6 +14,9 @@
     <dimen name="unit_margin_h">8dp</dimen>
     <dimen name="servings_padding_top">12dp</dimen>
     <dimen name="servings_padding_bottom">16dp</dimen>
+    <dimen name="recipe_image_height">200dp</dimen>
+    <dimen name="step_thumbnail_width">40dp</dimen>
+    <dimen name="step_thumbnail_height">40dp</dimen>
     <integer name="recipe_grid_columns">1</integer>
     <bool name="dual_pane_mode">false</bool>
 </resources>

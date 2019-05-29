@@ -2,18 +2,23 @@ package com.mdzyuba.bakingtime.view.details;
 
 import android.content.Context;
 import android.graphics.PointF;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
 import com.mdzyuba.bakingtime.RecipeDetailActivity;
 import com.mdzyuba.bakingtime.RecipeListActivity;
+import com.mdzyuba.bakingtime.images.PicassoProvider;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +47,9 @@ public class RecipeDetailFragment extends Fragment {
     @BindView(R.id.tv_ingredients_label)
     TextView ingredients;
 
+    @BindView(R.id.image)
+    ImageView imageView;
+
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
     private RecipeDetailsViewAdapter viewAdapter;
@@ -57,6 +65,23 @@ public class RecipeDetailFragment extends Fragment {
                 int stepIndex = IntentArgs.getSelectedStep(getArguments());
                 Timber.d("Setting a step index %d", stepIndex);
                 detailsViewModel.setStepIndex(stepIndex);
+            }
+            Context context = getContext();
+            if (context != null && !TextUtils.isEmpty(recipe.getImage())) {
+                Picasso picasso = PicassoProvider.getPicasso(context);
+                try {
+                    Uri imageUri = Uri.parse(recipe.getImage());
+                    picasso.load(imageUri).placeholder(R.drawable.image_placeholder).into(imageView);
+                    imageView.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Timber.e(e, "Unable to load the image %s", recipe.getImage());
+                    ErrorDialog.showErrorDialog(context, new ErrorDialog.Retry() {
+                        @Override
+                        public void retry() {
+                            loadRecipe();
+                        }
+                    });
+                }
             }
         }
     };

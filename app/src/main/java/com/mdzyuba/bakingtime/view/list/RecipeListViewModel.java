@@ -21,7 +21,7 @@ public class RecipeListViewModel extends AndroidViewModel {
         loadRecipes();
     }
 
-    private void loadRecipes() {
+    public void loadRecipes() {
         LoadRecipeCollectionTask task = new LoadRecipeCollectionTask(getApplication(), recipes);
         task.execute();
     }
