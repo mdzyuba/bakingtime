@@ -18,7 +18,7 @@ import timber.log.Timber;
         Step.class
 }, version = 1, exportSchema = false)
 public abstract class RecipeDatabase extends RoomDatabase {
-    public static final String DATABASE_NAME = "recipes";
+    private static final String DATABASE_NAME = "recipes";
     private static final Object LOCK = new Object();
     private static RecipeDatabase sInstance;
 
@@ -33,6 +33,14 @@ public abstract class RecipeDatabase extends RoomDatabase {
             }
         }
         return sInstance;
+    }
+
+    /**
+     * This method is used for testing only.
+     * @param database a db instance.
+     */
+    public static void setInstance(RecipeDatabase database) {
+        sInstance = database;
     }
 
     public abstract RecipeDao recipeDao();

@@ -13,7 +13,6 @@ import com.mdzyuba.bakingtime.http.HttpClientProvider;
 import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
-import com.mdzyuba.model.BuildConfig;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +35,6 @@ import timber.log.Timber;
 
 public class RecipeFactory {
 
-    private static final String RECIPES_URL = BuildConfig.BAKER_URL;
     private static final String DELIMITER = "\\A";
 
     private final RecipeDatabase database;
@@ -45,12 +43,8 @@ public class RecipeFactory {
         database = RecipeDatabase.getInstance(context);
     }
 
-    public RecipeFactory(RecipeDatabase database) {
-        this.database = database;
-    }
-
     @VisibleForTesting
-    Collection<Recipe> loadRecipes(Context context, @Nullable String json) {
+    Collection<Recipe> loadRecipes(@Nullable String json) {
         if (json == null) {
             Timber.e("Unable to retrieve recipe data from the service");
             // TODO: address the no network case
@@ -60,11 +54,11 @@ public class RecipeFactory {
         Type collectionType = new TypeToken<Collection<Recipe>>(){}.getType();
         Collection<Recipe> recipes = gson.fromJson(json, collectionType);
         updateChildParentReferences(recipes);
-        saveRecipesToDb(context, recipes);
+        saveRecipesToDb(recipes);
         return recipes;
     }
 
-    private void saveRecipesToDb(Context context, Collection<Recipe> recipes) {
+    private void saveRecipesToDb(Collection<Recipe> recipes) {
         RecipeDao recipeDao = database.recipeDao();
         IngredientDao ingredientDao = database.ingredientDao();
         StepDao stepDao = database.stepDao();
@@ -89,6 +83,9 @@ public class RecipeFactory {
         Recipe recipe = recipeDao.loadRecipe(recipeId);
 
         StepDao stepDao = database.stepDao();
+        if (recipe == null) {
+            return null;
+        }
         List<Step> steps = stepDao.loadSteps(recipe.getId());
         recipe.setSteps(steps);
 
@@ -119,11 +116,11 @@ public class RecipeFactory {
 
     public Collection<Recipe> loadRecipes(Context context) throws IOException {
         URL url = getUrl();
-        return loadRecipes(context, getResponseFromHttpUrl(context, url));
+        return loadRecipes(getResponseFromHttpUrl(context, url));
     }
 
     private URL getUrl() throws MalformedURLException {
-        Uri uri = Uri.parse(RECIPES_URL).buildUpon().build();
+        Uri uri = Uri.parse(Config.getRecipeUrl()).buildUpon().build();
         return new URL(uri.toString());
     }
 

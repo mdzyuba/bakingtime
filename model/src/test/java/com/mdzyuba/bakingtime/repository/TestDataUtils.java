@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 import androidx.annotation.Nullable;
 
-public class TestDataUtils {
+class TestDataUtils {
     private static final String DELIMITER = "\\A";
 
     @Nullable

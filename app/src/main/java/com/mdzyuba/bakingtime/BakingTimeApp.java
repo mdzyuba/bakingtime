@@ -33,7 +33,6 @@ public class BakingTimeApp extends Application {
                                            .detectLeakedSqlLiteObjects()
                                            .detectLeakedClosableObjects()
                                            .penaltyLog()
-                                           .penaltyDeath()
                                            .build());
         }
     }

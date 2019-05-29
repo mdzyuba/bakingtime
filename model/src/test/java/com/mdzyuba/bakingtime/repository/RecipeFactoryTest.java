@@ -2,16 +2,17 @@ package com.mdzyuba.bakingtime.repository;
 
 import android.content.Context;
 
-import com.mdzyuba.bakingtime.db.RecipeDatabase;
 import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.testutil.BuildConfig;
+import com.mdzyuba.testutil.TestConfig;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import java.util.Collection;
 import java.util.List;
@@ -24,18 +25,18 @@ public class RecipeFactoryTest {
 
     private static final String BAKING_JSON = "baking.json";
 
+    @Before
+    public void setUp() {
+        Context context = ApplicationProvider.getApplicationContext();
+        TestConfig.setupTestDb(context, BuildConfig.TEST_BAKER_URL);
+    }
+
     @Test
     public void loadRecipes_parsesJson() throws Exception {
         String json = TestDataUtils.getJsonString(BAKING_JSON);
         Context context = ApplicationProvider.getApplicationContext();
-
-        RecipeDatabase database = Room.inMemoryDatabaseBuilder(context.getApplicationContext(),
-                                                       RecipeDatabase.class)
-                                      .allowMainThreadQueries()
-                                      .build();
-
-        RecipeFactory factory = new RecipeFactory(database);
-        Collection<Recipe> recipes = factory.loadRecipes(context, json);
+        RecipeFactory factory = new RecipeFactory(context);
+        Collection<Recipe> recipes = factory.loadRecipes(json);
         assertNotNull(recipes);
         assertEquals(4, recipes.size());
         System.out.println(recipes);
