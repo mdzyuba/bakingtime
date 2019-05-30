@@ -19,13 +19,26 @@ import androidx.lifecycle.Observer;
 import timber.log.Timber;
 
 public class RecipeDetailsViewModel extends AndroidViewModel {
+    public final ObservableBoolean nextStepAvailable;
+    public final ObservableBoolean previousStepAvailable;
+    public final MutableLiveData<Boolean> ingredientsSelectorLd;
+
     private final MutableLiveData<Recipe> recipe;
     // Current step
     private final MutableLiveData<Step> step;
     private final MutableLiveData<Integer> stepIndexLd;
     private int stepIndex;
-    public final ObservableBoolean nextStepAvailable;
-    public final ObservableBoolean previousStepAvailable;
+
+    private final Observer<Integer> stepIndexObserver = new Observer<Integer>() {
+        @Override
+        public void onChanged(Integer stepIndex) {
+            if (IntentArgs.STEP_NOT_SELECTED == stepIndex) {
+                return;
+            }
+            // Either a step or an ingredients item could be selected at a time
+            ingredientsSelectorLd.postValue(false);
+        }
+    };
 
     public RecipeDetailsViewModel(@NonNull Application application) {
         super(application);
@@ -35,6 +48,8 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         stepIndex = IntentArgs.STEP_NOT_SELECTED;
         nextStepAvailable = new ObservableBoolean(false);
         previousStepAvailable = new ObservableBoolean(false);
+        ingredientsSelectorLd = new MutableLiveData<>();
+        stepIndexLd.observeForever(stepIndexObserver);
     }
 
     public void loadRecipe(@NonNull Integer recipeId) {
@@ -60,7 +75,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         return recipe;
     }
 
-    public void setStepIndex(int stepIndex) {
+    public void selectStep(int stepIndex) {
         Timber.d("Setting a step index: %d", stepIndex);
         this.stepIndex = stepIndex;
         stepIndexLd.postValue(stepIndex);
@@ -139,5 +154,14 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
             return recipe.getValue().getSteps().get(stepIndex - 1);
         }
         return null;
+    }
+
+    public void selectIngredients() {
+        ingredientsSelectorLd.postValue(true);
+        clearSelectedStep();
+    }
+
+    public void clearSelectedStep() {
+        selectStep(IntentArgs.STEP_NOT_SELECTED);
     }
 }

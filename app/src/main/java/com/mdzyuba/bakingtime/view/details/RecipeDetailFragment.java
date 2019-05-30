@@ -53,7 +53,6 @@ public class RecipeDetailFragment extends Fragment {
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
     private RecipeDetailsViewAdapter viewAdapter;
-    private IngredientsSelectorListener ingredientsSelectorListener;
 
     private final Observer<Recipe> recipeObserver = new Observer<Recipe>() {
         @Override
@@ -64,7 +63,7 @@ public class RecipeDetailFragment extends Fragment {
             if (IntentArgs.isStepSelected(getArguments())) {
                 int stepIndex = IntentArgs.getSelectedStep(getArguments());
                 Timber.d("Setting a step index %d", stepIndex);
-                detailsViewModel.setStepIndex(stepIndex);
+                detailsViewModel.selectStep(stepIndex);
             }
             Context context = getContext();
             if (context != null && !TextUtils.isEmpty(recipe.getImage())) {
@@ -108,6 +107,20 @@ public class RecipeDetailFragment extends Fragment {
         }
     };
 
+    private final View.OnClickListener ingredientsClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            detailsViewModel.selectIngredients();
+        }
+    };
+
+    private final Observer<Boolean> ingredientsSelectorObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean state) {
+            ingredients.setSelected(state);
+        }
+    };
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -133,6 +146,7 @@ public class RecipeDetailFragment extends Fragment {
         detailsViewModel.getRecipe().observe(this, recipeObserver);
         detailsViewModel.getStep().observe(this, stepObserver);
         detailsViewModel.getStepIndexLd().observe(this, stepIndexObserver);
+        detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsSelectorObserver);
 
         if (savedInstanceState == null) {
             loadRecipe();
@@ -156,24 +170,9 @@ public class RecipeDetailFragment extends Fragment {
         CustomLayoutManager layoutManager = new CustomLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        ingredients.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Recipe recipe = detailsViewModel.getRecipe().getValue();
-                if (recipe != null) {
-                    if (ingredientsSelectorListener != null) {
-                        ingredientsSelectorListener.onIngredientsSelected(recipe.getId());
-                    }
-                }
-            }
-        });
+        ingredients.setOnClickListener(ingredientsClickListener);
 
         return rootView;
-    }
-
-    public void setIngredientsSelectorListener(
-            IngredientsSelectorListener ingredientsSelectorListener) {
-        this.ingredientsSelectorListener = ingredientsSelectorListener;
     }
 
     /**

@@ -10,7 +10,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
-import com.mdzyuba.bakingtime.view.details.IngredientsSelectorListener;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
@@ -60,7 +59,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
             if (isTwoPane() &&
                 detailsViewModel.getStepIndex() == IntentArgs.STEP_NOT_SELECTED &&
                 detailsViewModel.getTotalSteps() > 0) {
-                detailsViewModel.setStepIndex(0);
+                detailsViewModel.selectStep(0);
             }
         }
     };
@@ -70,6 +69,22 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         public void onChanged(Step step) {
             detailsViewModel.getStep().removeObserver(this);
             showStepDetailsFragment(step);
+        }
+    };
+
+    private final Observer<Boolean> ingredientsItemObserver = new Observer<Boolean>() {
+        @Override
+        public void onChanged(Boolean ingredientsSelected) {
+            Recipe recipe = detailsViewModel.getRecipe().getValue();
+            if (!ingredientsSelected || recipe == null) {
+                return;
+            }
+            int recipeId = recipe.getId();
+            if (isTwoPane()) {
+                showIngredientsListFragment(recipeId);
+            } else {
+                IngredientsListActivity.startActivity(RecipeDetailActivity.this, recipeId);
+            }
         }
     };
 
@@ -92,6 +107,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         ButterKnife.bind(this);
         detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
         detailsViewModel.getRecipe().observe(this, recipeObserver);
+        detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsItemObserver);
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
@@ -138,7 +154,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     public void onStepSelected(@NonNull Step step) {
         Timber.d("Step selected: %s", step);
         int stepIndex = detailsViewModel.getStepIndex(step);
-        detailsViewModel.setStepIndex(stepIndex);
+        detailsViewModel.selectStep(stepIndex);
         if (isTwoPane()) {
             // TODO: try not reloading details fragment in the landscape mode. Update UI based on the model.
             Timber.d("showStepDetailsFragment");
@@ -213,24 +229,8 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         RecipeDetailFragment fragment = new RecipeDetailFragment();
         fragment.setArguments(arguments);
 
-        fragment.setIngredientsSelectorListener(new IngredientsSelectorListener() {
-            @Override
-            public void onIngredientsSelected(int recipeId) {
-                if (isTwoPane()) {
-                    showIngredientsListFragment(recipeId);
-                    clearSelectedStep();
-                } else {
-                    IngredientsListActivity.startActivity(RecipeDetailActivity.this, recipeId);
-                }
-            }
-        });
-
         getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)
                                    .commit();
-    }
-
-    private void clearSelectedStep() {
-        detailsViewModel.setStepIndex(IntentArgs.STEP_NOT_SELECTED);
     }
 
     private void showIngredientsListFragment(int recipeId) {
@@ -263,7 +263,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     private void updateSelectedStep(Bundle savedInstanceState) {
         int stepIndex = IntentArgs.getSelectedStep(savedInstanceState);
         if (IntentArgs.isStepSelected(stepIndex)) {
-            detailsViewModel.setStepIndex(stepIndex);
+            detailsViewModel.selectStep(stepIndex);
         }
     }
 }

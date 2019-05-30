@@ -61,7 +61,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
                     return;
                 }
                 int stepIndex = IntentArgs.getSelectedStep(arguments);
-                detailsViewModel.setStepIndex(stepIndex);
+                detailsViewModel.selectStep(stepIndex);
             }
         });
 
@@ -136,7 +136,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
             Recipe recipe = detailsViewModel.getRecipe().getValue();
             if (recipe != null) {
                 Timber.d("Navigating to step: %s", step);
-                detailsViewModel.setStepIndex(stepIndex);
+                detailsViewModel.selectStep(stepIndex);
             }
         }
     }

@@ -8,6 +8,7 @@
     <color name="stepSelectedBackground">#FFECB3</color>
     <color name="ingredientsTitleBackground">#E8F5E9</color>
     <color name="ingredientsTitlePressedBackground">#C8E6C9</color>
+    <color name="ingredientsTitleSelectedBackground">@color/stepSelectedBackground</color>
     <color name="buttonIconEnabled">#00574B</color>
     <color name="buttonIconDisabled">#4D80CBC4</color>
     <color name="buttonIconFocused">#00574B</color>

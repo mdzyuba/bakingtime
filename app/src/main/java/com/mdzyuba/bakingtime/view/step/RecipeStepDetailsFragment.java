@@ -138,7 +138,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                 Timber.d("step index: %d, model step: %s", stepIndex, step);
                 int currentStepIndex = detailsViewModel.getStepIndex(step);
                 if (step != null && currentStepIndex != stepIndex) {
-                    detailsViewModel.setStepIndex(stepIndex);
+                    detailsViewModel.selectStep(stepIndex);
                 }
             }
         });
