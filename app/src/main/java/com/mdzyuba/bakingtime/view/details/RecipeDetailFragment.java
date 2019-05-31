@@ -141,38 +141,32 @@ public class RecipeDetailFragment extends Fragment {
         if (activity instanceof RecipeStepSelectorListener) {
             itemDetailsSelectorListener = (RecipeStepSelectorListener) activity;
         }
-
-        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
-        detailsViewModel.getRecipe().observe(this, recipeObserver);
-        detailsViewModel.getStep().observe(this, stepObserver);
-        detailsViewModel.getStepIndexLd().observe(this, stepIndexObserver);
-        detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsSelectorObserver);
-
-        if (savedInstanceState == null) {
-            loadRecipe();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        detailsViewModel.getRecipe().removeObserver(recipeObserver);
-        detailsViewModel.getStep().removeObserver(stepObserver);
-        detailsViewModel.getStepIndexLd().removeObserver(stepIndexObserver);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_details_fragment, container, false);
-
         ButterKnife.bind(this, rootView);
 
         CustomLayoutManager layoutManager = new CustomLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
         ingredients.setOnClickListener(ingredientsClickListener);
-
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        detailsViewModel = ViewModelProviders.of(getActivity()).get(RecipeDetailsViewModel.class);
+        detailsViewModel.getRecipe().observe(getViewLifecycleOwner(), recipeObserver);
+        detailsViewModel.getStep().observe(getViewLifecycleOwner(), stepObserver);
+        detailsViewModel.getStepIndexLd().observe(getViewLifecycleOwner(), stepIndexObserver);
+        detailsViewModel.ingredientsSelectorLd.observe(getViewLifecycleOwner(), ingredientsSelectorObserver);
+
+        if (savedInstanceState == null) {
+            loadRecipe();
+        }
     }
 
     /**
