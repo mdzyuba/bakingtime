@@ -13,7 +13,9 @@ import org.junit.runners.Suite;
 import androidx.test.core.app.ApplicationProvider;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({RecipeListActivityTest.class, RecipeDetailActivityTest.class})
+@Suite.SuiteClasses({ RecipeListActivityTest.class,
+                            RecipeDetailActivityTest.class,
+                            RecipeMasterDetailViewTest.class })
 public class TestSuite {
     @Before
     public void setUp() throws Exception {
