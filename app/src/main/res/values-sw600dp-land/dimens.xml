@@ -2,4 +2,5 @@
 <resources>
     <integer name="recipe_grid_columns">3</integer>
     <dimen name="list_margin_h">40dp</dimen>
+    <bool name="dual_pane_mode">true</bool>
 </resources>
