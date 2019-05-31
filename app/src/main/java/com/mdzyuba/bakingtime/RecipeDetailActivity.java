@@ -67,8 +67,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     private final Observer<Step> stepObserver = new Observer<Step>() {
         @Override
         public void onChanged(Step step) {
-            detailsViewModel.getStep().removeObserver(this);
-            showStepDetailsFragment(step);
+            if (isTwoPane()) {
+                showStepDetailsFragment(step);
+            }
         }
     };
 
@@ -105,14 +106,18 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recipe_details_frame_activity);
         ButterKnife.bind(this);
-        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
-        detailsViewModel.getRecipe().observe(this, recipeObserver);
-        detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsItemObserver);
 
         // Show the Up button in the action bar.
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
+        if (detailsViewModel == null) {
+            detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+            detailsViewModel.getRecipe().observe(this, recipeObserver);
+            detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsItemObserver);
+            detailsViewModel.getStep().observe(this, stepObserver);
         }
 
         // savedInstanceState is non-null when there is fragment state
@@ -126,9 +131,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         //
         if (savedInstanceState == null) {
             showRecipeDetailsFragment();
-            if (isTwoPane()) {
-                detailsViewModel.getStep().observe(this, stepObserver);
-            }
         } else {
             updateSelectedStep(savedInstanceState);
         }
@@ -156,21 +158,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         int stepIndex = detailsViewModel.getStepIndex(step);
         detailsViewModel.selectStep(stepIndex);
         if (isTwoPane()) {
-            // TODO: try not reloading details fragment in the landscape mode. Update UI based on the model.
-            Timber.d("showStepDetailsFragment");
-            showStepDetailsFragment(step);
-        } else {
-            Timber.d("start RecipeStepDetailsActivity");
-            Recipe recipe = detailsViewModel.getRecipe().getValue();
-            if (recipe == null) {
-                Timber.e("The recipe should be initialized");
-                return;
-            }
-            Intent intent = RecipeStepDetailsActivity.getActivityForResultIntent(this,
-                                                                                 recipe.getId(),
-                                                                                 stepIndex);
-            startActivityForResult(intent, SELECT_STEP_REQUEST);
+            return;
         }
+        startStepDetailsActivity(stepIndex);
     }
 
     @Override
@@ -199,10 +189,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     protected void onDestroy() {
         super.onDestroy();
         VideoPlayerSingleton.getInstance(this).releasePlayer();
-        detailsViewModel.getRecipe().removeObserver(recipeObserver);
-        if (isTwoPane()) {
-            detailsViewModel.getStep().removeObserver(stepObserver);
-        }
     }
 
     @Override
@@ -217,6 +203,18 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
      */
     private boolean isTwoPane() {
         return dualPaneFrame != null;
+    }
+
+    private void startStepDetailsActivity(int stepIndex) {
+        Timber.d("start RecipeStepDetailsActivity");
+        Recipe recipe = detailsViewModel.getRecipe().getValue();
+        if (recipe == null) {
+            Timber.e("The recipe should be initialized");
+            return;
+        }
+        Intent intent = RecipeStepDetailsActivity
+                .getActivityForResultIntent(this, recipe.getId(), stepIndex);
+        startActivityForResult(intent, SELECT_STEP_REQUEST);
     }
 
     private void showRecipeDetailsFragment() {
