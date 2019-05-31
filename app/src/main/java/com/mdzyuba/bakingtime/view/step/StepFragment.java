@@ -29,7 +29,7 @@ import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.mdzyuba.bakingtime.R;
-import com.mdzyuba.bakingtime.databinding.RecipeStepDetailsFragmentBinding;
+import com.mdzyuba.bakingtime.databinding.StepFragmentBinding;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
@@ -50,8 +50,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import timber.log.Timber;
 
-public class RecipeStepDetailsFragment extends Fragment {
-    private static final String TAG = RecipeStepDetailsFragment.class.getSimpleName();
+public class StepFragment extends Fragment {
+    private static final String TAG = StepFragment.class.getSimpleName();
 
     private RecipeDetailsViewModel detailsViewModel;
 
@@ -146,7 +146,7 @@ public class RecipeStepDetailsFragment extends Fragment {
         }
     };
 
-    private RecipeStepDetailsFragmentBinding viewBinding;
+    private StepFragmentBinding viewBinding;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -175,7 +175,7 @@ public class RecipeStepDetailsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         Timber.d("onCreateView: activity: %s", getActivity());
         viewBinding = DataBindingUtil
-                .inflate(inflater, R.layout.recipe_step_details_fragment, container, false);
+                .inflate(inflater, R.layout.step_fragment, container, false);
         View rootView = viewBinding.getRoot();
         ButterKnife.bind(this, rootView);
         viewBinding.setLifecycleOwner(this);

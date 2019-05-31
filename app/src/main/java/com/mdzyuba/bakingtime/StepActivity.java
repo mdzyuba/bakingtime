@@ -12,7 +12,7 @@ import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
-import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
+import com.mdzyuba.bakingtime.view.step.StepFragment;
 import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
 import androidx.annotation.NonNull;
@@ -30,13 +30,13 @@ import timber.log.Timber;
  * could highlight the currently selected step. The activity result is preserved on back button
  * click as well as home button click.
  */
-public class RecipeStepDetailsActivity extends AppCompatActivity implements
-                                                                 RecipeStepDetailsFragment.PlayerProvider,
+public class StepActivity extends AppCompatActivity implements
+                                                                 StepFragment.PlayerProvider,
                                                                  RecipeStepSelectorListener {
     private RecipeDetailsViewModel detailsViewModel;
 
     public static Intent getActivityForResultIntent(Context context, int recipeId, int stepIndex) {
-        Intent intent = new Intent(context, RecipeStepDetailsActivity.class);
+        Intent intent = new Intent(context, StepActivity.class);
         IntentArgs.setArgs(intent, recipeId, stepIndex);
         return intent;
     }
@@ -44,7 +44,7 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.recipe_step_details_activity);
+        setContentView(R.layout.step_activity);
 
         detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
 
@@ -151,8 +151,8 @@ public class RecipeStepDetailsActivity extends AppCompatActivity implements
     }
 
     private void showRecipeDetailsFragment() {
-        final String FRAGMENT_TAG = RecipeStepDetailsFragment.class.getSimpleName();
-        RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
+        final String FRAGMENT_TAG = StepFragment.class.getSimpleName();
+        StepFragment recipeStepDetailsFragment = new StepFragment();
         Bundle extras = getIntent().getExtras();
         IntentArgs.setSelectedStep(extras, detailsViewModel.getStepIndex());
         recipeStepDetailsFragment.setArguments(extras);

@@ -33,7 +33,7 @@
                 android:value="com.mdzyuba.bakingtime.RecipeListActivity" />
         </activity>
         <activity
-            android:name=".RecipeStepDetailsActivity"
+            android:name=".StepActivity"
             android:label="@string/title_activity_recipe_step_details"
             android:parentActivityName=".RecipeDetailActivity">
             <meta-data

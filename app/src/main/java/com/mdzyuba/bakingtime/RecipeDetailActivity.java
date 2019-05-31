@@ -14,7 +14,7 @@ import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 import com.mdzyuba.bakingtime.view.ingredients.IngredientsListFragment;
-import com.mdzyuba.bakingtime.view.step.RecipeStepDetailsFragment;
+import com.mdzyuba.bakingtime.view.step.StepFragment;
 import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
 import androidx.annotation.NonNull;
@@ -35,7 +35,7 @@ import timber.log.Timber;
  * The activity requires RecipeDetailFragment.ARG_RECIPE_ID parameter.
  */
 public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener,
-                                                                       RecipeStepDetailsFragment.PlayerProvider {
+                                                                       StepFragment.PlayerProvider {
 
     private static final int SELECT_STEP_REQUEST = 1;
 
@@ -212,7 +212,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
             Timber.e("The recipe should be initialized");
             return;
         }
-        Intent intent = RecipeStepDetailsActivity
+        Intent intent = StepActivity
                 .getActivityForResultIntent(this, recipe.getId(), stepIndex);
         startActivityForResult(intent, SELECT_STEP_REQUEST);
     }
@@ -249,7 +249,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
         arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
 
-        RecipeStepDetailsFragment recipeStepDetailsFragment = new RecipeStepDetailsFragment();
+        StepFragment recipeStepDetailsFragment = new StepFragment();
         recipeStepDetailsFragment.setArguments(arguments);
         recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
 
