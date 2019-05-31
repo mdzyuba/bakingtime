@@ -51,30 +51,30 @@ public class IngredientsListFragment extends Fragment {
         return new IngredientsListFragment();
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Context context = getContext();
-        if (context == null) {
-            Timber.e("The context is null. Unable to create the fragment.");
-            return;
-        }
-        listAdapter = new IngredientsListAdapter(context, new ArrayList<>());
-        viewModel = ViewModelProviders.of(this).get(IngredientsListViewModel.class);
-        viewModel.getRecipe().observe(this, recipeIsReady);
-        if (savedInstanceState == null) {
-            loadRecipe();
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.ingredients_list_fragment, container, false);
         ButterKnife.bind(this, rootView);
+        Context context = getContext();
+        if (context == null) {
+            Timber.e("The context is null. Unable to create the fragment.");
+            return rootView;
+        }
+        listAdapter = new IngredientsListAdapter(context, new ArrayList<>());
         ingredientsList.setAdapter(listAdapter);
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        viewModel = ViewModelProviders.of(this).get(IngredientsListViewModel.class);
+        viewModel.getRecipe().observe(getViewLifecycleOwner(), recipeIsReady);
+        if (savedInstanceState == null) {
+            loadRecipe();
+        }
     }
 
     private void loadRecipe() {
