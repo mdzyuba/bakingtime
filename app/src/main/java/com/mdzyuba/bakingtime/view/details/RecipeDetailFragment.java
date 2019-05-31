@@ -1,7 +1,6 @@
 package com.mdzyuba.bakingtime.view.details;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -22,12 +21,12 @@ import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +48,9 @@ public class RecipeDetailFragment extends Fragment {
 
     @BindView(R.id.image)
     ImageView imageView;
+
+    @BindView(R.id.nested_scroll_view)
+    NestedScrollView nestedScrollView;
 
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
@@ -148,7 +150,7 @@ public class RecipeDetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.recipe_details_fragment, container, false);
         ButterKnife.bind(this, rootView);
 
-        CustomLayoutManager layoutManager = new CustomLayoutManager(getContext());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
         ingredients.setOnClickListener(ingredientsClickListener);
@@ -158,7 +160,12 @@ public class RecipeDetailFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        detailsViewModel = ViewModelProviders.of(getActivity()).get(RecipeDetailsViewModel.class);
+        FragmentActivity activity = getActivity();
+        if (activity == null) {
+            Timber.w("The activity is null. Unable to create the view model.");
+            return;
+        }
+        detailsViewModel = ViewModelProviders.of(activity).get(RecipeDetailsViewModel.class);
         detailsViewModel.getRecipe().observe(getViewLifecycleOwner(), recipeObserver);
         detailsViewModel.getStep().observe(getViewLifecycleOwner(), stepObserver);
         detailsViewModel.getStepIndexLd().observe(getViewLifecycleOwner(), stepIndexObserver);
@@ -166,35 +173,6 @@ public class RecipeDetailFragment extends Fragment {
 
         if (savedInstanceState == null) {
             loadRecipe();
-        }
-    }
-
-    /**
-     * This RecyclerView LayoutManager helps with scrolling to a selected step.
-     */
-    static class CustomLayoutManager extends LinearLayoutManager {
-        CustomLayoutManager(Context context) {
-            super(context, RecyclerView.VERTICAL, false);
-        }
-
-        @Override
-        public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state,
-                                           int position) {
-            RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(recyclerView.getContext()) {
-
-                @Override
-                protected int getVerticalSnapPreference() {
-                    return SNAP_TO_START;
-                }
-
-                @Nullable
-                @Override
-                public PointF computeScrollVectorForPosition(int targetPosition) {
-                    return CustomLayoutManager.this.computeScrollVectorForPosition(targetPosition);
-                }
-            };
-            smoothScroller.setTargetPosition(position);
-            startSmoothScroll(smoothScroller);
         }
     }
 
@@ -214,6 +192,12 @@ public class RecipeDetailFragment extends Fragment {
         if (viewAdapter != null && IntentArgs.isStepSelected(stepIndex)) {
             Timber.d("Scrolling to step index: %d", stepIndex);
             recyclerView.smoothScrollToPosition(stepIndex);
+
+            RecyclerView.ViewHolder viewHolder =
+                    recyclerView.findViewHolderForAdapterPosition(stepIndex);
+            if (viewHolder != null) {
+                nestedScrollView.requestChildFocus(recyclerView, viewHolder.itemView);
+            }
         }
     }
 
