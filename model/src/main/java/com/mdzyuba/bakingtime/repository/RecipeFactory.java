@@ -73,12 +73,18 @@ public class RecipeFactory {
         }
     }
 
+    public void cleanDb() {
+        database.recipeDao().deleteAll();
+        database.ingredientDao().deleteAll();
+        database.stepDao().deleteAll();
+    }
+
     public List<Recipe> loadAllRecipesFromDb() {
         RecipeDao recipeDao = database.recipeDao();
         return recipeDao.loadRecipes();
     }
 
-    public Recipe loadRecipe(Context context, @NonNull Integer recipeId) {
+    public Recipe loadRecipe(@NonNull Integer recipeId) {
         RecipeDao recipeDao = database.recipeDao();
         Recipe recipe = recipeDao.loadRecipe(recipeId);
 
@@ -94,11 +100,6 @@ public class RecipeFactory {
         recipe.setIngredients(ingredients);
 
         return recipe;
-    }
-
-    public Step loadStep(Context context, int stepId) {
-        StepDao stepDao = database.stepDao();
-        return stepDao.loadStep(stepId);
     }
 
     private void updateChildParentReferences(Collection<Recipe> recipes) {

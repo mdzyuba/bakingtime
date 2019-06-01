@@ -17,4 +17,5 @@
     <string name="step_thumbnail">Step Thumbnail</string>
     <string name="loading_recipes">Loading recipes …</string>
     <string name="progress_bar">Progress bar</string>
+    <string name="refresh_recipes">Refresh Recipes</string>
 </resources>

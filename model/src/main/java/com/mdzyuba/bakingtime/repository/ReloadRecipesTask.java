@@ -13,14 +13,13 @@ import androidx.lifecycle.MutableLiveData;
 import timber.log.Timber;
 
 /**
- * This task will load recipes from the DB first. If the DB is empty, it will load recipes from
- * the remote service.
+ * This task will clean the DB and load recipes from the remote service.
  */
-public class LoadRecipeCollectionTask extends AsyncTask<Void, Void, Collection<Recipe>> {
+public class ReloadRecipesTask extends AsyncTask<Void, Void, Collection<Recipe>> {
     private final MutableLiveData<Collection<Recipe>> recipes;
     private final WeakReference<Context> contextWeakReference;
 
-    public LoadRecipeCollectionTask(Context context, MutableLiveData<Collection<Recipe>> recipes) {
+    public ReloadRecipesTask(Context context, MutableLiveData<Collection<Recipe>> recipes) {
         this.contextWeakReference = new WeakReference<>(context);
         this.recipes = recipes;
     }
@@ -33,11 +32,8 @@ public class LoadRecipeCollectionTask extends AsyncTask<Void, Void, Collection<R
                 return null;
             }
             RecipeFactory factory = new RecipeFactory(context);
-            Collection<Recipe> recipes = factory.loadAllRecipesFromDb();
-            if (recipes == null || recipes.isEmpty()) {
-                recipes = factory.loadRecipes(contextWeakReference.get());
-            }
-            return recipes;
+            factory.cleanDb();
+            return factory.loadRecipes(context);
         } catch (IOException e) {
             Timber.e(e);
         }

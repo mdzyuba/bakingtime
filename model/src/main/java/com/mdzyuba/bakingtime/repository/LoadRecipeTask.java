@@ -9,6 +9,9 @@ import java.lang.ref.WeakReference;
 
 import androidx.lifecycle.MutableLiveData;
 
+/**
+ * Loads a recipe from the DB.
+ */
 public class LoadRecipeTask extends AsyncTask<Integer, Void, Recipe> {
     private final WeakReference<Context> contextWeakReference;
     private final Integer recipeId;
@@ -29,10 +32,7 @@ public class LoadRecipeTask extends AsyncTask<Integer, Void, Recipe> {
             return null;
         }
         RecipeFactory recipeFactory = new RecipeFactory(context);
-        if (context != null) {
-            return recipeFactory.loadRecipe(context, recipeId);
-        }
-        return null;
+        return recipeFactory.loadRecipe(recipeId);
     }
 
     @Override

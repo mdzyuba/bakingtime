@@ -2,6 +2,8 @@ package com.mdzyuba.bakingtime;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -38,6 +40,9 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     @BindView(R.id.loading_recipes_progress)
     LinearLayout progressView;
 
+    private RecipeListViewModel recipeListViewModel;
+    private RecipeRecyclerViewAdapter adapter;
+
     private final Observer<Collection<Recipe>> recipesObserver = new Observer<Collection<Recipe>>() {
         @Override
         public void onChanged(Collection<Recipe> recipes) {
@@ -51,15 +56,16 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
                 });
                 return;
             }
-            RecipeRecyclerViewAdapter adapter =
-                    new RecipeRecyclerViewAdapter(RecipeListActivity.this,
-                                                  new ArrayList<>(recipes));
-            recyclerView.setAdapter(adapter);
-            progressView.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
+
+            if (adapter == null) {
+                adapter = new RecipeRecyclerViewAdapter(RecipeListActivity.this,
+                                                        new ArrayList<>(recipes));
+                recyclerView.setAdapter(adapter);
+            }
+
+            updateRecipeLoadingProgress(recipes);
         }
     };
-    private RecipeListViewModel recipeListViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +84,20 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (R.id.action_refresh == item.getItemId()) {
+            recipeListViewModel.reloadRecipes();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onRecipeSelected(Recipe recipe) {
         RecipeDetailActivity.startActivity(this, recipe.getId(), IntentArgs.STEP_NOT_SELECTED);
         updateWidget(recipe);
@@ -91,4 +111,13 @@ public class RecipeListActivity extends AppCompatActivity implements RecipeSelec
         sendBroadcast(intent);
     }
 
+    private void updateRecipeLoadingProgress(Collection<Recipe> recipes) {
+        if (recipes.isEmpty()) {
+            progressView.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            progressView.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+    }
 }
