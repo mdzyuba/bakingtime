@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.mdzyuba.bakingtime.db.IngredientDao;
 import com.mdzyuba.bakingtime.db.RecipeDao;
@@ -14,15 +15,16 @@ import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Scanner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,8 +36,6 @@ import okhttp3.ResponseBody;
 import timber.log.Timber;
 
 public class RecipeFactory {
-
-    private static final String DELIMITER = "\\A";
 
     private final RecipeDatabase database;
 
@@ -117,7 +117,7 @@ public class RecipeFactory {
 
     public Collection<Recipe> loadRecipes(Context context) throws IOException {
         URL url = getUrl();
-        return loadRecipes(getResponseFromHttpUrl(context, url));
+        return loadRecipes(context, url);
     }
 
     private URL getUrl() throws MalformedURLException {
@@ -125,7 +125,7 @@ public class RecipeFactory {
         return new URL(uri.toString());
     }
 
-    private String getResponseFromHttpUrl(Context context, URL url) throws IOException {
+    private Collection<Recipe> loadRecipes(Context context, URL url) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -136,17 +136,16 @@ public class RecipeFactory {
             if (body == null) {
                 return null;
             }
-            try (InputStream in = body.byteStream())  {
-                Scanner scanner = new Scanner(in);
-                scanner.useDelimiter(DELIMITER);
-
-                boolean hasInput = scanner.hasNext();
-                if (hasInput) {
-                    return scanner.next();
-                } else {
-                    return null;
-                }
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(body.byteStream(), StandardCharsets.UTF_8))) {
+                Gson gson = new GsonBuilder().create();
+                Type collectionType = new TypeToken<Collection<Recipe>>(){}.getType();
+                Collection<Recipe> recipes = gson.fromJson(reader, collectionType);
+                updateChildParentReferences(recipes);
+                saveRecipesToDb(recipes);
+                return recipes;
             }
         }
     }
+
 }
