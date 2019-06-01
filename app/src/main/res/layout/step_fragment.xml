@@ -24,6 +24,8 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:adjustViewBounds="true"
+            app:show_buffering="when_playing"
+            app:shutter_background_color="@color/background"
             app:layout_constraintBottom_toTopOf="@+id/guideline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

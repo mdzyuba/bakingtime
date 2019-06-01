@@ -3,6 +3,7 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="background">#E8EAF6</color>
     <color name="stepBackground">#E8EAF6</color>
     <color name="stepPressedBackground">#C5CAE9</color>
     <color name="stepSelectedBackground">#FFECB3</color>
@@ -17,6 +18,9 @@
     <color name="buttonCircleDisabled">@color/cardview_light_background</color>
     <color name="buttonArrowEnabled">@color/colorPrimary</color>
     <color name="buttonArrowDisabled">@color/cardview_light_background</color>
-    <color name="image_placeholder">@color/stepBackground</color>
 
+    <color name="playerButtonShape">@color/colorPrimary</color>
+    <color name="playerButtonBackground">#99E8EAF6</color>
+
+    <color name="image_placeholder">@color/stepBackground</color>
 </resources>

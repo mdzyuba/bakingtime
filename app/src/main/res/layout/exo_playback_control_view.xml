@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton android:id="@id/exo_play"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_gravity="center"
+        android:background="@drawable/player_play"
+        android:contentDescription="@string/play" />
+
+    <ImageButton android:id="@id/exo_pause"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
+        android:layout_gravity="center"
+        android:background="@drawable/player_pause"
+        android:contentDescription="@string/pause" />
+
+</FrameLayout>

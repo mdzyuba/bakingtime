@@ -1,0 +1,9 @@
+<vector android:height="24dp" android:viewportHeight="31.750002"
+    android:viewportWidth="31.749998" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="@color/playerButtonBackground"
+        android:pathData="M15.875,15.875m-13.2632,0a13.2632,13.2632 0,1 1,26.5265 0a13.2632,13.2632 0,1 1,-26.5265 0" android:strokeWidth="0.26458332"/>
+    <path android:fillColor="@color/playerButtonShape"
+        android:pathData="M17.1083,22.9576l4.4099,-0l0,-14.1653l-4.4099,-0z" android:strokeWidth="0.26458332"/>
+    <path android:fillColor="@color/playerButtonShape"
+        android:pathData="M9.6906,23.0049l4.4099,-0l0,-14.1653l-4.4099,-0z" android:strokeWidth="0.26458332"/>
+</vector>

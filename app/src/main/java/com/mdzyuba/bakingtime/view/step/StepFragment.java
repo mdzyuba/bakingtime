@@ -209,6 +209,14 @@ public class StepFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        if (exoPlayer != null) {
+            exoPlayer.stop();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (mediaSession != null) {
@@ -321,6 +329,7 @@ public class StepFragment extends Fragment {
             if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
                 stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                                        exoPlayer.getCurrentPosition(), 1f);
+                playerView.hideController();
             } else if((playbackState == ExoPlayer.STATE_READY)){
                 stateBuilder.setState(PlaybackStateCompat.STATE_PAUSED,
                                        exoPlayer.getCurrentPosition(), 1f);

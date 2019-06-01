@@ -18,4 +18,6 @@
     <string name="loading_recipes">Loading recipes …</string>
     <string name="progress_bar">Progress bar</string>
     <string name="refresh_recipes">Refresh Recipes</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
 </resources>
