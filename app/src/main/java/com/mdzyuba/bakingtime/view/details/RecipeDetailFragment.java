@@ -7,7 +7,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mdzyuba.bakingtime.R;
@@ -17,6 +19,7 @@ import com.mdzyuba.bakingtime.images.PicassoProvider;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import androidx.annotation.NonNull;
@@ -49,6 +52,12 @@ public class RecipeDetailFragment extends Fragment {
     @BindView(R.id.image)
     ImageView imageView;
 
+    @BindView(R.id.image_frame)
+    FrameLayout imageFrame;
+
+    @BindView(R.id.loading_progress)
+    ProgressBar imageLoadingProgressBar;
+
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
 
@@ -69,20 +78,7 @@ public class RecipeDetailFragment extends Fragment {
             }
             Context context = getContext();
             if (context != null && !TextUtils.isEmpty(recipe.getImage())) {
-                Picasso picasso = PicassoProvider.getPicasso(context);
-                try {
-                    Uri imageUri = Uri.parse(recipe.getImage());
-                    picasso.load(imageUri).placeholder(R.drawable.image_placeholder).into(imageView);
-                    imageView.setVisibility(View.VISIBLE);
-                } catch (Exception e) {
-                    Timber.e(e, "Unable to load the image %s", recipe.getImage());
-                    ErrorDialog.showErrorDialog(context, new ErrorDialog.Retry() {
-                        @Override
-                        public void retry() {
-                            loadRecipe();
-                        }
-                    });
-                }
+                loadRecipeImage(recipe, context);
             }
         }
     };
@@ -184,6 +180,38 @@ public class RecipeDetailFragment extends Fragment {
                 recipeId != detailsViewModel.getRecipe().getValue().getId()) {
                 detailsViewModel.loadRecipe(recipeId);
             }
+        }
+    }
+
+    private void loadRecipeImage(Recipe recipe, Context context) {
+        imageFrame.setVisibility(View.VISIBLE);
+        Picasso picasso = PicassoProvider.getPicasso(context);
+        try {
+            Uri imageUri = Uri.parse(recipe.getImage());
+            Callback imageLoadingCallback = new Callback() {
+                @Override
+                public void onSuccess() {
+                    imageLoadingProgressBar.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    imageLoadingProgressBar.setVisibility(View.GONE);
+                    imageFrame.setVisibility(View.GONE);
+                    Timber.e(e, "Unable to load the image");
+                }
+            };
+            picasso.load(imageUri)
+                   .placeholder(R.drawable.image_placeholder)
+                   .into(imageView, imageLoadingCallback);
+        } catch (Exception e) {
+            Timber.e(e, "Unable to load the image %s", recipe.getImage());
+            ErrorDialog.showErrorDialog(context, new ErrorDialog.Retry() {
+                @Override
+                public void retry() {
+                    loadRecipe();
+                }
+            });
         }
     }
 
