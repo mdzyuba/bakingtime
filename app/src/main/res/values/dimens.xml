@@ -7,9 +7,6 @@
     <dimen name="text_size">18sp</dimen>
     <dimen name="text_line_spacing">1sp</dimen>
     <dimen name="image_button_width">48dp</dimen>
-    <dimen name="list_padding">16dp</dimen>
-    <dimen name="list_padding_top">16dp</dimen>
-    <dimen name="list_padding_bottom">16dp</dimen>
     <dimen name="list_margin_h">8dp</dimen>
     <dimen name="unit_margin_h">8dp</dimen>
     <dimen name="servings_padding_top">12dp</dimen>

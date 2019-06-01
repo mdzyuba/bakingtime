@@ -10,10 +10,7 @@
         android:id="@+id/ingredients_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingStart="@dimen/list_padding"
-        android:paddingEnd="@dimen/list_padding"
-        android:paddingTop="@dimen/list_padding_top"
-        android:paddingBottom="@dimen/list_padding_bottom"
+        android:padding="@dimen/list_padding"
         android:layout_marginStart="@dimen/list_margin_h"
         android:layout_marginEnd="@dimen/list_margin_h"
         android:layout_above="@+id/tv_servings"/>

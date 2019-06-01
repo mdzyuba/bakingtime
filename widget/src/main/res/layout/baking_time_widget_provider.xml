@@ -3,19 +3,16 @@
     android:id="@+id/widget"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#80FFFFFF"
-    android:padding="@dimen/widget_margin">
+    android:background="@drawable/appwidget_bg"
+    android:padding="@dimen/widget_padding">
 
     <TextView
         android:id="@+id/tv_recipe_title"
         style="@style/recipeTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/recipeBackground"
-        android:paddingStart="@dimen/list_padding"
-        android:paddingTop="@dimen/list_padding_top"
-        android:paddingEnd="@dimen/list_padding"
-        android:paddingBottom="@dimen/list_padding_bottom"
+        android:background="@drawable/appwidget_title_bg"
+        android:padding="@dimen/list_padding"
         android:textColor="@color/recipeColor"
         tools:text="Baking Ingredients" />
 
@@ -24,12 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/tv_recipe_title"
-        android:layout_marginStart="@dimen/list_margin_h"
-        android:layout_marginEnd="@dimen/list_margin_h"
-        android:paddingStart="@dimen/list_padding"
-        android:paddingTop="@dimen/list_padding_top"
-        android:paddingEnd="@dimen/list_padding"
-        android:paddingBottom="@dimen/list_padding_bottom"
+        android:padding="@dimen/list_padding"
         tools:visibility="invisible" />
 
     <TextView
@@ -38,14 +30,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/tv_recipe_title"
-        android:paddingStart="@dimen/list_padding"
-        android:paddingTop="@dimen/list_padding_top"
-        android:paddingEnd="@dimen/list_padding"
-        android:paddingBottom="@dimen/list_padding_bottom"
+        android:padding="@dimen/list_padding"
         android:gravity="center"
         android:visibility="gone"
         tools:visibility="visible"
-        android:text="@string/no_recipe_selected"
-        />
+        android:text="@string/no_recipe_selected" />
 
 </RelativeLayout>

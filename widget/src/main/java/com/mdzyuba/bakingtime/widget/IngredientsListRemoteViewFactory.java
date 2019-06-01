@@ -47,8 +47,8 @@ public class IngredientsListRemoteViewFactory implements RemoteViewsService.Remo
     @Override
     public RemoteViews getViewAt(int position) {
         Ingredient ingredient = ingredientList.get(position);
-        RemoteViews listItem = new RemoteViews(context.getPackageName(),
-                                            R.layout.ingredients_list_item);
+        RemoteViews listItem =
+                new RemoteViews(context.getPackageName(), R.layout.ingredients_list_item);
         listItem.setTextViewText(R.id.tv_ingredient, ingredient.getIngredient());
         listItem.setTextViewText(R.id.tv_quantity, IngredientsViewUtil
                 .formatQuantity(context, ingredient.getQuantity()));
