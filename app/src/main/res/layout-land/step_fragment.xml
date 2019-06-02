@@ -23,6 +23,7 @@
             android:layout_marginEnd="24dp"
             android:adjustViewBounds="true"
             app:show_buffering="always"
+            app:shutter_background_color="@color/background"
             app:layout_constrainedHeight="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
