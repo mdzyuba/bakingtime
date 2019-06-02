@@ -153,7 +153,6 @@ public class StepFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Timber.d("onCreate - %s", this);
         final FragmentActivity activity = getActivity();
         if (activity == null) {
             Timber.e("The activity is null.");
@@ -175,7 +174,6 @@ public class StepFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Timber.d("onCreateView: activity: %s", getActivity());
         viewBinding = DataBindingUtil
                 .inflate(inflater, R.layout.step_fragment, container, false);
         View rootView = viewBinding.getRoot();
@@ -199,7 +197,6 @@ public class StepFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Timber.d("onActivityCreated - %s, %s", this, savedInstanceState);
         FragmentActivity activity = getActivity();
         if (savedInstanceState == null && activity != null) {
             Timber.d("Creating a view model: %s", this);
@@ -243,7 +240,6 @@ public class StepFragment extends Fragment {
     }
 
     private void initializePlayer() {
-        Timber.d("init player");
         Context context = getContext();
         PlayerProvider activity = (PlayerProvider) getActivity();
         if (activity == null || context == null) {

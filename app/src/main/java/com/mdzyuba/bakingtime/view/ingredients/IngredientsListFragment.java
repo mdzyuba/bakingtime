@@ -40,7 +40,6 @@ public class IngredientsListFragment extends Fragment {
     private final Observer<Recipe> recipeIsReady = new Observer<Recipe>() {
         @Override
         public void onChanged(Recipe recipe) {
-            Timber.d("recipe is ready");
             ArrayList<Ingredient> ingredientList = new ArrayList<>(recipe.getIngredients());
             listAdapter.updateIngredients(ingredientList);
             tvServings.setText(getString(R.string.servings, recipe.getServings()));

@@ -78,7 +78,6 @@ public class IngredientsListRemoteViewFactory implements RemoteViewsService.Remo
 
     @Override
     public boolean hasStableIds() {
-        // TODO: revisit that
         return true;
     }
 

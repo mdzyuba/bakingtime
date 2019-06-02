@@ -22,13 +22,10 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -41,21 +38,6 @@ public class RecipeFactory {
 
     public RecipeFactory(Context context) {
         database = RecipeDatabase.getInstance(context);
-    }
-
-    @VisibleForTesting
-    Collection<Recipe> loadRecipes(@Nullable String json) {
-        if (json == null) {
-            Timber.e("Unable to retrieve recipe data from the service");
-            // TODO: address the no network case
-            return new ArrayList<>();
-        }
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<Collection<Recipe>>(){}.getType();
-        Collection<Recipe> recipes = gson.fromJson(json, collectionType);
-        updateChildParentReferences(recipes);
-        saveRecipesToDb(recipes);
-        return recipes;
     }
 
     private void saveRecipesToDb(Collection<Recipe> recipes) {

@@ -68,13 +68,17 @@ public class RecipeMasterDetailViewTest {
             Timber.i("The test can be run on a tablet");
             return;
         }
-        // click Recipe Introduction
+        // Click Recipe Introduction.
         onView(withId(R.id.rv_details))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
-        // rotate the device
+        // Rotate the device.
         TestUtil.setOrientation(activity, (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+
+        // Even though the setOrientation() is using CountDownLatch, the test is still flaky
+        // unless we add a short wait after the device rotation. I hope there is a better way.
         // TODO: replace the sleep with a better option.
         TestUtil.delay();
+
         TestUtil.setOrientation(activity, (ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE));
         TestUtil.delay();
 

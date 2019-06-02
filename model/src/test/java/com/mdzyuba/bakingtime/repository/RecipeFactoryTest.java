@@ -2,6 +2,8 @@ package com.mdzyuba.bakingtime.repository;
 
 import android.content.Context;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mdzyuba.bakingtime.model.Ingredient;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
@@ -13,9 +15,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 
-import androidx.test.core.app.ApplicationProvider;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import androidx.annotation.Nullable;
+import androidx.test.core.app.ApplicationProvider;
+import timber.log.Timber;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -32,11 +39,9 @@ public class RecipeFactoryTest {
     }
 
     @Test
-    public void loadRecipes_parsesJson() throws Exception {
+    public void loadingRecipes_buildsModelClasses() throws Exception {
         String json = TestDataUtils.getJsonString(BAKING_JSON);
-        Context context = ApplicationProvider.getApplicationContext();
-        RecipeFactory factory = new RecipeFactory(context);
-        Collection<Recipe> recipes = factory.loadRecipes(json);
+        Collection<Recipe> recipes = loadRecipes(json);
         assertNotNull(recipes);
         assertEquals(4, recipes.size());
         System.out.println(recipes);
@@ -70,5 +75,21 @@ public class RecipeFactoryTest {
                 "-mixed-nutella-to-crust-creampie.mp4",
                 step.getVideoURL());
         assertEquals("", step.getThumbnailURL());
+    }
+
+    /**
+     * This method is used for testing only.
+     * @param json
+     * @return
+     */
+    Collection<Recipe> loadRecipes(@Nullable String json) {
+        if (json == null) {
+            Timber.e("Unable to retrieve recipe data from the service");
+            return new ArrayList<>();
+        }
+        Gson gson = new Gson();
+        Type collectionType = new TypeToken<Collection<Recipe>>(){}.getType();
+        Collection<Recipe> recipes = gson.fromJson(json, collectionType);
+        return recipes;
     }
 }

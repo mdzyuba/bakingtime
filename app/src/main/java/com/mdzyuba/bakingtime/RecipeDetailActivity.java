@@ -206,7 +206,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     }
 
     private void startStepDetailsActivity(int stepIndex) {
-        Timber.d("start RecipeStepDetailsActivity");
         Recipe recipe = detailsViewModel.getRecipe().getValue();
         if (recipe == null) {
             Timber.e("The recipe should be initialized");

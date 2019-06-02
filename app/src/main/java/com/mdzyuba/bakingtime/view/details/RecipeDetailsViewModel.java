@@ -107,7 +107,6 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
     }
 
     public int getStepIndex(Step step) {
-        // TODO: simplify to use a step id
         Recipe recipe = this.recipe.getValue();
         if (recipe == null) {
             return 0;

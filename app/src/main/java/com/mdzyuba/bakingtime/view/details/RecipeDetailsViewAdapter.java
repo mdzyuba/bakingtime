@@ -74,7 +74,6 @@ public class RecipeDetailsViewAdapter extends RecyclerView.Adapter<RecipeDetails
         return steps != null ? steps.size() : 0;
     }
 
-    // TODO: change to the step index.
     public void setSelectedStepPk(int selectedStepPk) {
         this.selectedStepPk = selectedStepPk;
         for (int i = 0; i < recipe.getSteps().size(); i++) {

@@ -32,7 +32,6 @@ public class VideoPlayerSingleton {
     }
 
     private SimpleExoPlayer createPlayer(Context context) {
-        Timber.d("init player");
         DefaultTrackSelector defaultTrackSelector = new DefaultTrackSelector();
         DefaultLoadControl defaultLoadControl = new DefaultLoadControl();
         return ExoPlayerFactory
