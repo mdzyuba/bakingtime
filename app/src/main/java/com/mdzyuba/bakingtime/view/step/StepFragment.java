@@ -322,6 +322,9 @@ public class StepFragment extends Fragment {
         @Override
         public void onLoadingChanged(boolean isLoading) {
             Timber.d("Loading %s", isLoading);
+            if (isLoading) {
+                playerView.hideController();
+            }
         }
 
         @Override
