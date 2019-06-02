@@ -33,6 +33,7 @@ import com.mdzyuba.bakingtime.databinding.StepFragmentBinding;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
+import com.mdzyuba.bakingtime.view.details.ErrorDialog;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
 
@@ -359,6 +360,16 @@ public class StepFragment extends Fragment {
                 SimpleExoPlayer exoPlayer = activity.getPlayer();
                 exoPlayer.removeListener(playerEventListener);
             }
+            Context context = getContext();
+            if (context == null) {
+                return;
+            }
+            ErrorDialog.showErrorDialog(context, new ErrorDialog.Retry() {
+                @Override
+                public void retry() {
+                    showStep(detailsViewModel.getStep().getValue());
+                }
+            });
         }
 
         @Override
