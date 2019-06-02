@@ -1,5 +1,6 @@
 package com.mdzyuba.bakingtime.view.step;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -291,15 +292,18 @@ public class StepFragment extends Fragment {
     }
 
     private void hidePlayer() {
-        playerView.setVisibility(View.GONE);
-        if (guideline != null) {
-            guideline.setVisibility(View.GONE);
-            guideline.setGuidelinePercent(0f);
-        }
-        if (description != null && isLandscapeOrientation() &&
-            description.getVisibility() == View.GONE) {
-            description.setVisibility(View.VISIBLE);
-            constraintLayout.setOnTouchListener(onTouchListener);
+        Activity activity = getActivity();
+        if (isAdded() && activity != null) {
+            playerView.setVisibility(View.GONE);
+            if (guideline != null) {
+                guideline.setVisibility(View.GONE);
+                guideline.setGuidelinePercent(0f);
+            }
+            if (description != null && isLandscapeOrientation() &&
+                description.getVisibility() == View.GONE) {
+                description.setVisibility(View.VISIBLE);
+                constraintLayout.setOnTouchListener(onTouchListener);
+            }
         }
     }
 
