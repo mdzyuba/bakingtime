@@ -74,9 +74,9 @@ public class RecipeFactory {
     }
 
     public void cleanDb() {
-        database.recipeDao().deleteAll();
-        database.ingredientDao().deleteAll();
-        database.stepDao().deleteAll();
+        database.beginTransaction();
+        database.clearAllTables();
+        database.endTransaction();
     }
 
     public List<Recipe> loadAllRecipesFromDb() {
@@ -85,6 +85,7 @@ public class RecipeFactory {
     }
 
     public Recipe loadRecipe(@NonNull Integer recipeId) {
+        Timber.d("loadRecipe %d", recipeId);
         RecipeDao recipeDao = database.recipeDao();
         Recipe recipe = recipeDao.loadRecipe(recipeId);
 
@@ -126,6 +127,7 @@ public class RecipeFactory {
     }
 
     private Collection<Recipe> loadRecipes(Context context, URL url) throws IOException {
+        Timber.d("loadRecipes");
         Request request = new Request.Builder()
                 .url(url)
                 .build();
