@@ -1,4 +1,3 @@
 <resources>
-    <string name="app_name">utils</string>
     <string name="quantity_number_format">%.0f</string>
 </resources>

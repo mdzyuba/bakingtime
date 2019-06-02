@@ -327,13 +327,16 @@ public class StepFragment extends Fragment {
         @Override
         public void onLoadingChanged(boolean isLoading) {
             Timber.d("Loading %s", isLoading);
-            if (isLoading) {
+            if (isLoading && playerView != null) {
                 playerView.hideController();
             }
         }
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            if (playerView == null || stateBuilder == null || mediaSession == null) {
+                return;
+            }
             if((playbackState == ExoPlayer.STATE_READY) && playWhenReady){
                 stateBuilder.setState(PlaybackStateCompat.STATE_PLAYING,
                                        exoPlayer.getCurrentPosition(), 1f);
@@ -360,7 +363,7 @@ public class StepFragment extends Fragment {
             Timber.e(error,"Player error: %s", error.getMessage());
             hidePlayer();
             PlayerProvider activity = (PlayerProvider) getActivity();
-            if (activity != null) {
+            if (activity != null && playerEventListener != null) {
                 SimpleExoPlayer exoPlayer = activity.getPlayer();
                 exoPlayer.removeListener(playerEventListener);
             }
