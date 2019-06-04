@@ -6,16 +6,12 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
+import com.mdzyuba.bakingtime.view.FragmentFactory;
 import com.mdzyuba.bakingtime.view.IntentArgs;
-import com.mdzyuba.bakingtime.view.details.RecipeDetailFragment;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
-import com.mdzyuba.bakingtime.view.ingredients.IngredientsListFragment;
-import com.mdzyuba.bakingtime.view.step.StepFragment;
-import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,8 +30,7 @@ import timber.log.Timber;
  *
  * The activity requires RecipeDetailFragment.ARG_RECIPE_ID parameter.
  */
-public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener,
-                                                                       StepFragment.PlayerProvider {
+public class RecipeDetailActivity extends AppCompatActivity implements RecipeStepSelectorListener {
 
     private static final int SELECT_STEP_REQUEST = 1;
 
@@ -68,7 +63,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         @Override
         public void onChanged(Step step) {
             if (isTwoPane()) {
-                showStepDetailsFragment(step);
+                FragmentFactory.showStepFragmentLandscapeOnly(RecipeDetailActivity.this,
+                                                              R.id.step_details_container,
+                                                              detailsViewModel, step);
             }
         }
     };
@@ -82,7 +79,7 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
             }
             int recipeId = recipe.getId();
             if (isTwoPane()) {
-                showIngredientsListFragment(recipeId);
+                FragmentFactory.showIngredientsListFragment(RecipeDetailActivity.this, recipeId);
             } else {
                 IngredientsListActivity.startActivity(RecipeDetailActivity.this, recipeId);
             }
@@ -113,25 +110,15 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        if (detailsViewModel == null) {
-            detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
-            detailsViewModel.getRecipe().observe(this, recipeObserver);
-            detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsItemObserver);
-            detailsViewModel.getStep().observe(this, stepObserver);
-        }
+        detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
+        detailsViewModel.ingredientsSelectorLd.observe(this, ingredientsItemObserver);
+        detailsViewModel.getRecipe().observe(this, recipeObserver);
+        detailsViewModel.getStep().observe(this, stepObserver);
 
-        // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
-        // (e.g. when rotating the screen from portrait to landscape).
-        // In this case, the fragment will automatically be re-added
-        // to its container so we don't need to manually add it.
-        // For more information, see the Fragments API guide at:
-        //
-        // http://developer.android.com/guide/components/fragments.html
-        //
         if (savedInstanceState == null) {
-            showRecipeDetailsFragment();
+            FragmentFactory.showRecipeDetailsFragment(this);
         } else {
+            // Restoring the state.
             updateSelectedStep(savedInstanceState);
         }
     }
@@ -140,12 +127,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home) {
-            // This ID represents the Home or Up button. In the case of this
-            // activity, the Up button is shown. For
-            // more details, see the Navigation pattern on Android Design:
-            //
-            // http://developer.android.com/design/patterns/navigation.html#up-vs-back
-            //
             navigateUpTo(new Intent(this, RecipeListActivity.class));
             return true;
         }
@@ -154,13 +135,11 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
 
     @Override
     public void onStepSelected(@NonNull Step step) {
-        Timber.d("Step selected: %s", step);
         int stepIndex = detailsViewModel.getStepIndex(step);
         detailsViewModel.selectStep(stepIndex);
-        if (isTwoPane()) {
-            return;
+        if (!isTwoPane()) {
+            startStepDetailsActivity(stepIndex);
         }
-        startStepDetailsActivity(stepIndex);
     }
 
     @Override
@@ -188,12 +167,9 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        VideoPlayerSingleton.getInstance(this).releasePlayer();
-    }
-
-    @Override
-    public SimpleExoPlayer getPlayer() {
-        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
+        detailsViewModel.ingredientsSelectorLd.removeObserver(ingredientsItemObserver);
+        detailsViewModel.getRecipe().removeObserver(recipeObserver);
+        detailsViewModel.getStep().removeObserver(stepObserver);
     }
 
     /**
@@ -214,47 +190,6 @@ public class RecipeDetailActivity extends AppCompatActivity implements RecipeSte
         Intent intent = StepActivity
                 .getActivityForResultIntent(this, recipe.getId(), stepIndex);
         startActivityForResult(intent, SELECT_STEP_REQUEST);
-    }
-
-    private void showRecipeDetailsFragment() {
-        Bundle arguments = new Bundle();
-        int recipeId = getIntent().getIntExtra(IntentArgs.ARG_RECIPE_ID, 0);
-        int stepIndex = getIntent().getIntExtra(IntentArgs.ARG_STEP_INDEX, IntentArgs.STEP_NOT_SELECTED);
-        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
-        arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
-        Timber.d("show RecipeDetailFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
-        RecipeDetailFragment fragment = new RecipeDetailFragment();
-        fragment.setArguments(arguments);
-
-        getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment)
-                                   .commit();
-    }
-
-    private void showIngredientsListFragment(int recipeId) {
-        IngredientsListFragment fragment = IngredientsListFragment.newInstance();
-        Bundle arguments = new Bundle();
-        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
-        fragment.setArguments(arguments);
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.step_details_container, fragment)
-                                   .commitNow();
-    }
-
-    private void showStepDetailsFragment(Step step) {
-        Bundle arguments = new Bundle();
-        int recipeId = step.getRecipeId();
-        int stepIndex = detailsViewModel.getStepIndex(step);
-        Timber.d("show RecipeStepDetailsFragment, recipeId: %d, stepIndex: %d", recipeId, stepIndex);
-        arguments.putInt(IntentArgs.ARG_RECIPE_ID, recipeId);
-        arguments.putInt(IntentArgs.ARG_STEP_INDEX, stepIndex);
-
-        StepFragment recipeStepDetailsFragment = new StepFragment();
-        recipeStepDetailsFragment.setArguments(arguments);
-        recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
-
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.step_details_container, recipeStepDetailsFragment)
-                                   .commit();
     }
 
     private void updateSelectedStep(Bundle savedInstanceState) {

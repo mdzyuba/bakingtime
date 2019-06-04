@@ -66,7 +66,8 @@ public class RecipeDetailActivityTest {
 
     @Test
     public void clickOnNextStepNavigationOpensNextStep() {
-        onView(withText("Recipe Introduction")).perform(click());
+        onView(ViewMatchers.withId(R.id.rv_details))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
         onView(withId(R.id.button_next)).check(matches(isDisplayed()));
         onView(withId(R.id.button_next)).perform(click());
         onView(withText(StringContains.containsString("Preheat the oven to 350")))
@@ -91,7 +92,8 @@ public class RecipeDetailActivityTest {
 
     @Test
     public void stepDetailsHasVideoPlayer() {
-        onView(withText("Recipe Introduction")).perform(click());
+        onView(ViewMatchers.withId(R.id.rv_details))
+                .perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
         onView(withId(R.id.video_player)).check(matches(isDisplayed()));
     }
 

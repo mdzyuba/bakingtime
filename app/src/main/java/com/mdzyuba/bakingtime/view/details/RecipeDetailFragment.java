@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import timber.log.Timber;
 
 /**
@@ -60,6 +61,8 @@ public class RecipeDetailFragment extends Fragment {
 
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
+
+    private Unbinder unbinder;
 
     private RecipeDetailsViewModel detailsViewModel;
     private RecipeStepSelectorListener itemDetailsSelectorListener;
@@ -144,7 +147,7 @@ public class RecipeDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.recipe_details_fragment, container, false);
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
@@ -170,6 +173,12 @@ public class RecipeDetailFragment extends Fragment {
         if (savedInstanceState == null) {
             loadRecipe();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     private void loadRecipe() {

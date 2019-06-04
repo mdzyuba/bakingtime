@@ -6,14 +6,12 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.mdzyuba.bakingtime.model.Recipe;
 import com.mdzyuba.bakingtime.model.Step;
 import com.mdzyuba.bakingtime.view.IntentArgs;
 import com.mdzyuba.bakingtime.view.details.RecipeDetailsViewModel;
 import com.mdzyuba.bakingtime.view.details.RecipeStepSelectorListener;
-import com.mdzyuba.bakingtime.view.step.StepFragment;
-import com.mdzyuba.bakingtime.view.step.VideoPlayerSingleton;
+import com.mdzyuba.bakingtime.view.FragmentFactory;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -30,10 +28,35 @@ import timber.log.Timber;
  * could highlight the currently selected step. The activity result is preserved on back button
  * click as well as home button click.
  */
-public class StepActivity extends AppCompatActivity implements
-                                                                 StepFragment.PlayerProvider,
-                                                                 RecipeStepSelectorListener {
+public class StepActivity extends AppCompatActivity implements RecipeStepSelectorListener {
+
     private RecipeDetailsViewModel detailsViewModel;
+    private final Observer<Recipe> recipeObserver = new Observer<Recipe>() {
+        @Override
+        public void onChanged(Recipe recipe) {
+            detailsViewModel.getRecipe().removeObserver(this);
+            if (detailsViewModel.getStepIndex() > IntentArgs.STEP_NOT_SELECTED) {
+                Timber.d("The model has step index: %d", detailsViewModel.getStepIndex());
+                return;
+            }
+            Bundle arguments = getIntent().getExtras();
+            if (arguments == null) {
+                Timber.e("No arguments provided. Unable to init the Recipe step");
+                return;
+            }
+            int stepIndex = IntentArgs.getSelectedStep(arguments);
+            detailsViewModel.selectStep(stepIndex);
+        }
+    };
+
+    private final Observer<Step> stepObserver = new Observer<Step>() {
+        @Override
+        public void onChanged(Step step) {
+            detailsViewModel.getStep().removeObserver(this);
+            Timber.d("Step is updated: %s", step);
+            showStep(step);
+        }
+    };
 
     public static Intent getActivityForResultIntent(Context context, int recipeId, int stepIndex) {
         Intent intent = new Intent(context, StepActivity.class);
@@ -44,35 +67,14 @@ public class StepActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Timber.d("onCreate %s", savedInstanceState);
         setContentView(R.layout.step_activity);
 
         detailsViewModel = ViewModelProviders.of(this).get(RecipeDetailsViewModel.class);
-
-        detailsViewModel.getRecipe().observe(this, new Observer<Recipe>() {
-            @Override
-            public void onChanged(Recipe recipe) {
-                if (detailsViewModel.getStepIndex() > IntentArgs.STEP_NOT_SELECTED) {
-                    Timber.d("The model has step index: %d", detailsViewModel.getStepIndex());
-                    return;
-                }
-                Bundle arguments = getIntent().getExtras();
-                if (arguments == null) {
-                    Timber.e("No arguments provided. Unable to init the Recipe step");
-                    return;
-                }
-                int stepIndex = IntentArgs.getSelectedStep(arguments);
-                detailsViewModel.selectStep(stepIndex);
-            }
-        });
-
-        detailsViewModel.getStep().observe(this, new Observer<Step>() {
-            @Override
-            public void onChanged(Step step) {
-                Timber.d("Step is updated: %s", step);
-                setTitle(step.getShortDescription());
-                showRecipeDetailsFragment();
-            }
-        });
+        if (savedInstanceState == null) {
+            detailsViewModel.getRecipe().observe(this, recipeObserver);
+            detailsViewModel.getStep().observe(this, stepObserver);
+        }
 
         if (savedInstanceState == null) {
             Bundle arguments = getIntent().getExtras();
@@ -115,30 +117,27 @@ public class StepActivity extends AppCompatActivity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        VideoPlayerSingleton.getInstance(this).releasePlayer();
-    }
-
-    @Override
-    public SimpleExoPlayer getPlayer() {
-        return VideoPlayerSingleton.getInstance(this).getExoPlayer(this);
-    }
-
-    @Override
     public void onStepSelected(@NonNull Step step) {
         int stepIndex = detailsViewModel.getStepIndex(step);
         if (isDualFrameMode()) {
-            RecipeDetailActivity.startActivity(this, step.getRecipeId(),
-                                               stepIndex);
+            RecipeDetailActivity.startActivity(this, step.getRecipeId(), stepIndex);
         } else {
             saveSelectedStepToActivityResult(stepIndex);
             Recipe recipe = detailsViewModel.getRecipe().getValue();
             if (recipe != null) {
-                Timber.d("Navigating to step: %s", step);
+                Timber.d("Selected step: %s", step);
                 detailsViewModel.selectStep(stepIndex);
+                showStep(step);
             }
         }
+    }
+
+    private void showStep(Step step) {
+        setTitle(step.getShortDescription());
+        int stepIndex = detailsViewModel.getStepIndex(step);
+        FragmentFactory.showStepFragment(this,
+                                         R.id.recipe_step_details_frame,
+                                         stepIndex);
     }
 
     private void saveSelectedStepToActivityResult(int stepIndex) {
@@ -148,20 +147,6 @@ public class StepActivity extends AppCompatActivity implements
             IntentArgs.setArgs(resultIntent, recipe.getId(), stepIndex);
             setResult(RESULT_OK, resultIntent);
         }
-    }
-
-    private void showRecipeDetailsFragment() {
-        final String FRAGMENT_TAG = StepFragment.class.getSimpleName();
-        StepFragment recipeStepDetailsFragment = new StepFragment();
-        Bundle extras = getIntent().getExtras();
-        IntentArgs.setSelectedStep(extras, detailsViewModel.getStepIndex());
-        recipeStepDetailsFragment.setArguments(extras);
-        recipeStepDetailsFragment.setItemDetailsSelectorListener(this);
-        getSupportFragmentManager().beginTransaction()
-                                   .replace(R.id.recipe_step_details_frame,
-                                            recipeStepDetailsFragment,
-                                            FRAGMENT_TAG)
-                                   .commit();
     }
 
     private boolean isLandscapeOrientation() {

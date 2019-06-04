@@ -22,6 +22,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.Unbinder;
 import timber.log.Timber;
 
 
@@ -34,6 +35,8 @@ public class IngredientsListFragment extends Fragment {
 
     @BindView(R.id.tv_servings)
     TextView tvServings;
+
+    private Unbinder unbinder;
 
     private IngredientsListAdapter listAdapter;
 
@@ -55,7 +58,7 @@ public class IngredientsListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.ingredients_list_fragment, container, false);
-        ButterKnife.bind(this, rootView);
+        unbinder = ButterKnife.bind(this, rootView);
         Context context = getContext();
         if (context == null) {
             Timber.e("The context is null. Unable to create the fragment.");
@@ -74,6 +77,12 @@ public class IngredientsListFragment extends Fragment {
         if (savedInstanceState == null) {
             loadRecipe();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
     private void loadRecipe() {

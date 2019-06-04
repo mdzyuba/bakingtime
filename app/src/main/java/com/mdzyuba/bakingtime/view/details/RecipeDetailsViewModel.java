@@ -27,7 +27,6 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
     // Current step
     private final MutableLiveData<Step> step;
     private final MutableLiveData<Integer> stepIndexLd;
-    private int stepIndex;
 
     private final Observer<Integer> stepIndexObserver = new Observer<Integer>() {
         @Override
@@ -45,7 +44,6 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         recipe = new MutableLiveData<>();
         stepIndexLd = new MutableLiveData<>();
         step = new MutableLiveData<>();
-        stepIndex = IntentArgs.STEP_NOT_SELECTED;
         nextStepAvailable = new ObservableBoolean(false);
         previousStepAvailable = new ObservableBoolean(false);
         ingredientsSelectorLd = new MutableLiveData<>();
@@ -56,6 +54,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         Timber.d("Load recipe: %d", recipeId);
         LoadRecipeTask loadRecipeTask = new LoadRecipeTask(getApplication(), recipeId, recipe);
         loadRecipeTask.execute();
+        int stepIndex = getStepIndex();
         if (IntentArgs.isStepSelected(stepIndex)) {
             recipe.observeForever(new Observer<Recipe>() {
                 @Override
@@ -77,7 +76,6 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
 
     public void selectStep(int stepIndex) {
         Timber.d("Setting a step index: %d", stepIndex);
-        this.stepIndex = stepIndex;
         stepIndexLd.postValue(stepIndex);
         if (IntentArgs.STEP_NOT_SELECTED == stepIndex) {
             return;
@@ -103,17 +101,20 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
     }
 
     public int getStepIndex() {
-        return stepIndex;
+        return getStepIndex(step.getValue());
     }
 
     public int getStepIndex(Step step) {
+        if (step == null) {
+            return IntentArgs.STEP_NOT_SELECTED;
+        }
         Recipe recipe = this.recipe.getValue();
         if (recipe == null) {
-            return 0;
+            return IntentArgs.STEP_NOT_SELECTED;
         }
         List<Step> steps = recipe.getSteps();
         if (steps == null) {
-            return 0;
+            return IntentArgs.STEP_NOT_SELECTED;
         }
         for (int i = 0; i < steps.size(); i++) {
             Step st = steps.get(i);
@@ -121,7 +122,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
                 return i;
             }
         }
-        return 0;
+        return IntentArgs.STEP_NOT_SELECTED;
     }
 
     public MutableLiveData<Integer> getStepIndexLd() {
@@ -137,7 +138,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         if (recipe.getValue() == null) {
             return null;
         }
-
+        int stepIndex = getStepIndex(step.getValue());
         if (stepIndex < getTotalSteps() - 1) {
             return recipe.getValue().getSteps().get(stepIndex + 1);
         }
@@ -149,6 +150,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         if (recipe.getValue() == null) {
             return null;
         }
+        int stepIndex = getStepIndex(step.getValue());
         if (stepIndex > 0) {
             return recipe.getValue().getSteps().get(stepIndex - 1);
         }
@@ -160,7 +162,7 @@ public class RecipeDetailsViewModel extends AndroidViewModel {
         clearSelectedStep();
     }
 
-    public void clearSelectedStep() {
+    private void clearSelectedStep() {
         selectStep(IntentArgs.STEP_NOT_SELECTED);
     }
 }

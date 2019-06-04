@@ -10,7 +10,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class HttpClientProvider {
-    private static final int CACHE_SIZE_BYTES = 200 * 1024 * 1024; // 200 Mb
+    private static final int CACHE_SIZE_BYTES = 512 * 1024 * 1024; // 512 Mb
     private static final String HTTP_CACHE = "http-cache";
     private static volatile OkHttpClient client;
 
